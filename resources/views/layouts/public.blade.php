@@ -27,9 +27,15 @@
 
             <div class="flex items-center gap-3">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="rounded-full px-5 py-3 text-sm font-bold text-bali-navy hover:bg-slate-100">
-                        Dashboard
-                    </a>
+                    @if (auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="rounded-full px-5 py-3 text-sm font-bold text-bali-navy hover:bg-slate-100">
+                            Admin Panel
+                        </a>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="rounded-full px-5 py-3 text-sm font-bold text-bali-navy hover:bg-slate-100">
+                            Dashboard
+                        </a>
+                    @endif
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

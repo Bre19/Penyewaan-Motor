@@ -22,6 +22,8 @@ class User extends Authenticatable
         'passport_number',
         'origin_country',
         'has_license',
+        'role',
+        'status',
     ];
 
     protected $hidden = [
