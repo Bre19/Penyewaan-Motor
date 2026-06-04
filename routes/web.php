@@ -6,6 +6,8 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MotorcycleController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -30,6 +32,12 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])
         ->name('bookings.cancel');
+
+    Route::get('/bookings/{booking}/payment', [PaymentController::class, 'create'])
+        ->name('payments.create');
+
+    Route::post('/bookings/{booking}/payment', [PaymentController::class, 'store'])
+        ->name('payments.store');
 });
 
 Route::middleware(['auth', 'admin'])
@@ -50,6 +58,18 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])
             ->name('bookings.reject');
+            
+        Route::get('/payments', [AdminPaymentController::class, 'index'])
+            ->name('payments.index');
+
+        Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])
+            ->name('payments.show');
+
+        Route::patch('/payments/{payment}/confirm', [AdminPaymentController::class, 'confirm'])
+            ->name('payments.confirm');
+
+        Route::patch('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])
+            ->name('payments.reject');
     });
 
 require __DIR__ . '/auth.php';

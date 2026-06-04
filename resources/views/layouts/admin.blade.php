@@ -32,6 +32,11 @@
                         Verifikasi Booking
                     </a>
 
+                    <a href="{{ route('admin.payments.index') }}"
+                        class="rounded-2xl px-4 py-3 transition {{ request()->routeIs('admin.payments.*') ? 'bg-white text-bali-navy' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
+                        Verifikasi Pembayaran
+                    </a>
+
                     <a href="{{ route('motorcycles.index') }}"
                        class="rounded-2xl px-4 py-3 text-slate-300 transition hover:bg-white/10 hover:text-white">
                         Lihat Website

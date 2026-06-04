@@ -53,7 +53,7 @@ class BookingController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['user', 'motorcycle']);
+        $booking->load(['motorcycle', 'latestPayment']);
 
         return view('admin.bookings.show', compact('booking'));
     }
@@ -65,7 +65,7 @@ class BookingController extends Controller
         }
 
         $booking->update([
-            'status' => Booking::STATUS_APPROVED,
+            'status' => Booking::STATUS_WAITING_PAYMENT,
             'approved_at' => now(),
             'rejected_at' => null,
             'rejection_reason' => null,
@@ -73,7 +73,7 @@ class BookingController extends Controller
 
         return redirect()
             ->route('admin.bookings.show', $booking)
-            ->with('success', 'Booking berhasil disetujui.');
+            ->with('success', 'Booking berhasil disetujui dan menunggu pembayaran dari penyewa.');
     }
 
     public function reject(Request $request, Booking $booking)

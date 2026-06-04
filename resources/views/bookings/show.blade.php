@@ -114,6 +114,58 @@
                 </div>
             @endif
 
+            @php
+                $latestPayment = $booking->latestPayment;
+            @endphp
+
+            <div class="mt-8 rounded-[1.7rem] border border-bali-line bg-white p-6">
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h3 class="text-xl font-black text-bali-navy">Pembayaran</h3>
+                        <p class="mt-2 text-sm leading-7 text-bali-muted">
+                            Upload bukti pembayaran setelah booking disetujui oleh admin.
+                        </p>
+                    </div>
+
+                    @if ($booking->canUploadPaymentProof())
+                        <a href="{{ route('payments.create', $booking) }}"
+                        class="rounded-full bg-bali-orange px-6 py-3 text-center text-sm font-black text-white transition hover:bg-bali-orange-dark">
+                            Upload Bukti Pembayaran
+                        </a>
+                    @endif
+                </div>
+
+                @if ($latestPayment)
+                    <div class="mt-6 grid gap-4 md:grid-cols-3">
+                        <div class="rounded-2xl bg-slate-100 p-4">
+                            <span class="block text-sm text-bali-muted">Kode Pembayaran</span>
+                            <strong class="mt-1 block text-bali-navy">{{ $latestPayment->payment_code }}</strong>
+                        </div>
+
+                        <div class="rounded-2xl bg-slate-100 p-4">
+                            <span class="block text-sm text-bali-muted">Metode</span>
+                            <strong class="mt-1 block text-bali-navy">{{ $latestPayment->methodLabel() }}</strong>
+                        </div>
+
+                        <div class="rounded-2xl bg-slate-100 p-4">
+                            <span class="block text-sm text-bali-muted">Status</span>
+                            <strong class="mt-1 block text-bali-navy">{{ $latestPayment->statusLabel() }}</strong>
+                        </div>
+                    </div>
+
+                    @if ($latestPayment->rejection_reason)
+                        <div class="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
+                            <strong class="block text-red-700">Alasan Penolakan Pembayaran</strong>
+                            <p class="mt-2 text-sm leading-7 text-red-700">{{ $latestPayment->rejection_reason }}</p>
+                        </div>
+                    @endif
+                @else
+                    <div class="mt-6 rounded-2xl bg-slate-100 p-5 text-sm text-bali-muted">
+                        Belum ada bukti pembayaran yang dikirim.
+                    </div>
+                @endif
+            </div>
+
             <div class="mt-8 flex flex-col gap-3 border-t border-bali-line pt-8 sm:flex-row">
                 <a href="{{ route('dashboard') }}"
                    class="rounded-full bg-bali-navy px-7 py-4 text-center text-sm font-black text-white transition hover:bg-bali-slate">

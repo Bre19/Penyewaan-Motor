@@ -63,7 +63,7 @@ class BookingController extends Controller
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
 
-        $booking->load('motorcycle');
+        $booking->load(['motorcycle', 'latestPayment']);
 
         return view('bookings.show', compact('booking'));
     }
