@@ -1,72 +1,113 @@
 @extends('layouts.public')
 
 @section('content')
-<section class="relative overflow-hidden bg-gradient-to-br from-bali-navy via-slate-900 to-blue-950 text-white">
-    <div class="absolute left-0 top-0 h-96 w-96 rounded-full bg-bali-teal/20 blur-3xl"></div>
-    <div class="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-bali-orange/20 blur-3xl"></div>
+<section class="relative overflow-hidden bg-bali-navy text-white">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(13,148,136,0.35),transparent_30rem),radial-gradient(circle_at_85%_20%,rgba(249,115,22,0.28),transparent_28rem)]"></div>
+    <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bali-soft to-transparent"></div>
 
-    <div class="relative mx-auto grid w-[min(1180px,92%)] items-center gap-12 py-20 lg:grid-cols-[1.05fr_0.95fr]">
+    <div class="container-page relative grid min-h-[720px] items-center gap-12 py-20 lg:grid-cols-[1.02fr_0.98fr]">
         <div>
-            <span class="mb-4 inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-bali-teal">
+            <span class="badge-teal bg-white/10 text-teal-200">
                 Motor Rental Bali
             </span>
 
-            <h1 class="max-w-3xl text-5xl font-black leading-tight tracking-[-0.05em] md:text-6xl">
-                Sewa Motor Mudah untuk Perjalanan Anda di Bali
+            <h1 class="mt-6 max-w-4xl text-5xl font-black leading-[0.95] tracking-[-0.06em] md:text-7xl">
+                Sewa motor lebih rapi, cepat, dan terpantau.
             </h1>
 
             <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                Pilih motor yang tersedia, tentukan durasi sewa, ajukan booking secara online,
-                lalu tunggu persetujuan admin tanpa proses chat manual yang panjang.
+                Pilih motor, ajukan sewa, upload pembayaran, dan pantau status penyewaan dari satu sistem.
+                Tidak perlu lagi tenggelam dalam chat manual yang nasibnya mirip laci penuh struk.
             </p>
 
-            <div class="mt-8 flex flex-wrap gap-4">
-                <a href="{{ route('motorcycles.index') }}" class="rounded-full bg-bali-orange px-7 py-4 text-sm font-black text-white hover:bg-bali-orange-dark">
-                    Lihat Motor
+            <div class="mt-9 flex flex-wrap gap-4">
+                <a href="{{ route('motorcycles.index') }}" class="btn-primary">
+                    Lihat Katalog Motor
                 </a>
-                <a href="#cara-sewa" class="rounded-full bg-white px-7 py-4 text-sm font-black text-bali-navy hover:bg-slate-100">
-                    Cara Sewa
+                <a href="#cara-sewa" class="btn-light">
+                    Lihat Cara Sewa
                 </a>
+            </div>
+
+            <div class="mt-10 grid max-w-2xl gap-4 sm:grid-cols-3">
+                <div class="rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+                    <strong class="block text-2xl font-black">Online</strong>
+                    <span class="mt-1 block text-sm text-slate-300">Booking tercatat</span>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+                    <strong class="block text-2xl font-black">Admin</strong>
+                    <span class="mt-1 block text-sm text-slate-300">Verifikasi jelas</span>
+                </div>
+                <div class="rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+                    <strong class="block text-2xl font-black">Status</strong>
+                    <span class="mt-1 block text-sm text-slate-300">Mudah dipantau</span>
+                </div>
             </div>
         </div>
 
-        <div class="relative min-h-[420px] rounded-[2rem] border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur">
-            <div class="absolute inset-8 rounded-[1.7rem] bg-gradient-to-br from-bali-teal via-bali-navy to-bali-orange"></div>
+        <div class="relative">
+            <div class="glass-panel rounded-[2.25rem] p-6">
+                <div class="relative min-h-[460px] overflow-hidden rounded-[1.8rem] bg-gradient-to-br from-slate-950 via-slate-800 to-teal-900 p-7">
+                    <div class="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-bali-orange/30 blur-3xl"></div>
+                    <div class="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-bali-teal/30 blur-3xl"></div>
 
-            <div class="absolute left-1/2 top-1/2 h-32 w-[70%] -translate-x-1/2 -translate-y-1/2 rounded-[6rem] bg-white shadow-2xl"></div>
-            <div class="absolute left-1/2 top-[66%] h-4 w-[58%] -translate-x-1/2 rounded-full bg-black/30 blur-md"></div>
+                    <div class="relative flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-black uppercase tracking-[0.18em] text-teal-200">Available Today</span>
+                            <h3 class="mt-2 text-2xl font-black">Honda Vario 125</h3>
+                        </div>
+                        <span class="rounded-full bg-white px-4 py-2 text-xs font-black text-bali-navy">Ready</span>
+                    </div>
 
-            <div class="absolute bottom-8 right-8 w-56 rounded-3xl bg-white p-5 text-bali-navy shadow-2xl">
-                <span class="text-xs font-bold text-bali-muted">Available Today</span>
-                <strong class="mt-2 block text-lg">Honda Vario 125</strong>
-                <small class="mt-1 block text-bali-muted">Rp80.000 / hari</small>
+                    <div class="relative mt-16 flex h-48 items-center justify-center">
+                        <div class="absolute h-24 w-[82%] rounded-full bg-white shadow-2xl"></div>
+                        <div class="absolute bottom-8 h-5 w-[68%] rounded-full bg-black/35 blur-lg"></div>
+                        <div class="absolute left-10 top-28 h-20 w-20 rounded-full border-[14px] border-slate-950 bg-white"></div>
+                        <div class="absolute right-12 top-28 h-20 w-20 rounded-full border-[14px] border-slate-950 bg-white"></div>
+                    </div>
+
+                    <div class="relative mt-12 grid gap-4 sm:grid-cols-2">
+                        <div class="rounded-2xl bg-white p-5 text-bali-navy">
+                            <span class="text-xs font-bold text-bali-muted">Harga</span>
+                            <strong class="mt-1 block text-xl font-black">Rp80.000 / hari</strong>
+                        </div>
+                        <div class="rounded-2xl bg-white/10 p-5">
+                            <span class="text-xs font-bold text-slate-300">Fasilitas</span>
+                            <strong class="mt-1 block text-xl font-black">Helm + STNK</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute -bottom-8 -left-6 hidden rounded-[1.5rem] bg-white p-5 text-bali-navy shadow-2xl md:block">
+                <span class="text-xs font-black uppercase tracking-wide text-bali-teal">Booking Flow</span>
+                <strong class="mt-2 block">Ajukan → Verifikasi → Bayar</strong>
             </div>
         </div>
     </div>
+</section>
 
-    <div class="relative mx-auto w-[min(1180px,92%)] pb-16">
-        <form action="{{ route('motorcycles.index') }}" method="GET" class="grid gap-4 rounded-[1.7rem] bg-white p-5 text-bali-slate shadow-2xl lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto]">
+<section class="-mt-16 relative z-10">
+    <div class="container-page">
+        <form action="{{ route('motorcycles.index') }}" method="GET" class="surface-card grid gap-4 rounded-[2rem] p-5 lg:grid-cols-[1.2fr_1fr_1fr_1fr_auto]">
             <div>
                 <label class="mb-2 block text-xs font-black uppercase tracking-wide text-bali-navy">Lokasi Pengantaran</label>
-                <input type="text" name="delivery_location" placeholder="Contoh: Kuta, Canggu, Ubud"
-                    class="h-13 w-full rounded-2xl border border-bali-line px-4 text-sm outline-none focus:border-bali-teal">
+                <input type="text" name="delivery_location" placeholder="Kuta, Canggu, Ubud" class="input-ui">
             </div>
 
             <div>
                 <label class="mb-2 block text-xs font-black uppercase tracking-wide text-bali-navy">Tanggal Mulai</label>
-                <input type="date" name="start_date"
-                    class="h-13 w-full rounded-2xl border border-bali-line px-4 text-sm outline-none focus:border-bali-teal">
+                <input type="date" name="start_date" class="input-ui">
             </div>
 
             <div>
                 <label class="mb-2 block text-xs font-black uppercase tracking-wide text-bali-navy">Tanggal Selesai</label>
-                <input type="date" name="end_date"
-                    class="h-13 w-full rounded-2xl border border-bali-line px-4 text-sm outline-none focus:border-bali-teal">
+                <input type="date" name="end_date" class="input-ui">
             </div>
 
             <div>
                 <label class="mb-2 block text-xs font-black uppercase tracking-wide text-bali-navy">Jenis Motor</label>
-                <select name="type" class="h-13 w-full rounded-2xl border border-bali-line px-4 text-sm outline-none focus:border-bali-teal">
+                <select name="type" class="input-ui">
                     <option value="">Semua Jenis</option>
                     @foreach ($types as $type)
                         <option value="{{ $type }}">{{ $type }}</option>
@@ -74,31 +115,35 @@
                 </select>
             </div>
 
-            <button type="submit" class="self-end rounded-2xl bg-bali-teal px-7 py-4 text-sm font-black text-white hover:bg-bali-teal-dark">
+            <button type="submit" class="btn-primary self-end">
                 Cari Motor
             </button>
         </form>
     </div>
 </section>
 
-<section class="py-20">
-    <div class="mx-auto w-[min(1180px,92%)]">
-        <div class="mb-10 max-w-3xl">
-            <span class="mb-3 inline-flex text-xs font-black uppercase tracking-[0.18em] text-bali-teal">
-                Motor Tersedia
-            </span>
-            <h2 class="text-4xl font-black tracking-[-0.04em] text-bali-navy md:text-5xl">
-                Pilih Motor Sesuai Kebutuhan Perjalanan
-            </h2>
-            <p class="mt-4 leading-8 text-bali-muted">
-                Daftar motor yang siap digunakan untuk perjalanan harian maupun wisata di Bali.
-            </p>
+<section class="py-24">
+    <div class="container-page">
+        <div class="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div class="max-w-3xl">
+                <span class="badge-teal">Motor Tersedia</span>
+                <h2 class="mt-4 text-4xl font-black tracking-[-0.04em] text-bali-navy md:text-5xl">
+                    Pilihan motor untuk perjalanan di Bali.
+                </h2>
+                <p class="mt-4 leading-8 text-bali-muted">
+                    Motor siap digunakan untuk kebutuhan wisata, harian, maupun perjalanan singkat.
+                </p>
+            </div>
+
+            <a href="{{ route('motorcycles.index') }}" class="btn-dark">
+                Semua Motor
+            </a>
         </div>
 
         <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             @forelse ($motorcycles as $motorcycle)
-                <article class="overflow-hidden rounded-[1.7rem] border border-bali-line bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
-                    <div class="flex h-52 items-center justify-center bg-gradient-to-br from-cyan-50 to-slate-50 p-6 text-center font-black text-bali-navy">
+                <article class="motor-card">
+                    <div class="flex h-56 items-center justify-center bg-gradient-to-br from-slate-100 via-white to-orange-50 p-6 text-center font-black text-bali-navy">
                         @if ($motorcycle->image)
                             <img src="{{ asset('storage/' . $motorcycle->image) }}" alt="{{ $motorcycle->brand }} {{ $motorcycle->model }}" class="h-full w-full object-contain">
                         @else
@@ -110,9 +155,9 @@
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h3 class="font-black text-bali-navy">{{ $motorcycle->brand }} {{ $motorcycle->model }}</h3>
-                                <p class="mt-1 text-sm text-bali-muted">{{ $motorcycle->type ?? '-' }} • {{ $motorcycle->year ?? '-' }}</p>
+                                <p class="mt-1 text-sm font-semibold text-bali-muted">{{ $motorcycle->type ?? '-' }} • {{ $motorcycle->year ?? '-' }}</p>
                             </div>
-                            <span class="rounded-full bg-teal-50 px-3 py-1 text-xs font-black text-bali-teal-dark">Tersedia</span>
+                            <span class="rounded-full bg-teal-50 px-3 py-1 text-xs font-black text-bali-teal-dark">Ready</span>
                         </div>
 
                         <div class="mt-5 flex flex-wrap gap-2">
@@ -124,9 +169,9 @@
                         <div class="mt-5 flex items-center justify-between border-t border-bali-line pt-5">
                             <div>
                                 <strong class="text-lg font-black text-bali-navy">Rp{{ number_format($motorcycle->price_per_day, 0, ',', '.') }}</strong>
-                                <small class="text-bali-muted">/ hari</small>
+                                <small class="font-semibold text-bali-muted">/ hari</small>
                             </div>
-                            <a href="{{ route('motorcycles.show', $motorcycle) }}" class="rounded-full bg-bali-navy px-5 py-3 text-sm font-black text-white hover:bg-bali-slate">
+                            <a href="{{ route('motorcycles.show', $motorcycle) }}" class="btn-dark px-5 py-2.5">
                                 Detail
                             </a>
                         </div>
@@ -136,47 +181,39 @@
                 <p class="rounded-3xl bg-white p-8 text-bali-muted">Belum ada motor tersedia.</p>
             @endforelse
         </div>
-
-        <div class="mt-10 flex justify-center">
-            <a href="{{ route('motorcycles.index') }}" class="rounded-full border border-bali-line bg-white px-7 py-4 text-sm font-black text-bali-navy hover:bg-slate-50">
-                Lihat Semua Motor
-            </a>
-        </div>
     </div>
 </section>
 
-<section id="cara-sewa" class="bg-slate-100 py-20">
-    <div class="mx-auto w-[min(1180px,92%)]">
+<section id="cara-sewa" class="bg-white py-24">
+    <div class="container-page">
         <div class="mb-10 max-w-3xl">
-            <span class="mb-3 inline-flex text-xs font-black uppercase tracking-[0.18em] text-bali-teal">
-                Cara Sewa
-            </span>
-            <h2 class="text-4xl font-black tracking-[-0.04em] text-bali-navy md:text-5xl">
-                Proses Sewa Lebih Terstruktur
+            <span class="badge-orange">Cara Sewa</span>
+            <h2 class="mt-4 text-4xl font-black tracking-[-0.04em] text-bali-navy md:text-5xl">
+                Alur sewa dibuat lebih jelas.
             </h2>
             <p class="mt-4 leading-8 text-bali-muted">
-                Alur dibuat sesuai proses bisnis penyewaan motor dari registrasi sampai motor diterima penyewa.
+                Dari registrasi sampai motor diterima, semua proses tercatat dan dapat dipantau.
             </p>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            @php
-                $steps = [
-                    ['01', 'Register Akun', 'Penyewa membuat akun dan mengisi data diri dasar.'],
-                    ['02', 'Lengkapi Dokumen', 'Upload paspor, visa, SIM jika ada, dan tanda tangan digital.'],
-                    ['03', 'Pilih Motor', 'Pilih motor, tanggal sewa, durasi, dan lokasi pengantaran.'],
-                    ['04', 'Menunggu Persetujuan', 'Admin memeriksa data penyewa, dokumen, dan ketersediaan motor.'],
-                    ['05', 'Pembayaran', 'Pembayaran dapat dilakukan secara digital atau cash.'],
-                    ['06', 'Motor Diantar', 'Setelah pembayaran valid, motor disiapkan dan diantar ke lokasi penyewa.'],
-                ];
-            @endphp
+        @php
+            $steps = [
+                ['01', 'Register Akun', 'Penyewa membuat akun dan mengisi data awal.'],
+                ['02', 'Pilih Motor', 'Pilih motor, tanggal sewa, durasi, dan lokasi pengantaran.'],
+                ['03', 'Verifikasi Admin', 'Admin memeriksa data penyewa dan ketersediaan motor.'],
+                ['04', 'Pembayaran', 'Penyewa upload bukti pembayaran untuk diverifikasi.'],
+                ['05', 'Motor Diantar', 'Motor disiapkan dan diantar ke lokasi penyewa.'],
+                ['06', 'Selesai', 'Motor dikembalikan dan transaksi diselesaikan.'],
+            ];
+        @endphp
 
+        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             @foreach ($steps as [$number, $title, $description])
-                <div class="rounded-[1.7rem] border border-bali-line bg-white p-7 shadow-sm">
-                    <span class="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-bali-navy font-black text-white">
+                <div class="soft-card rounded-[1.7rem] p-7">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-bali-navy font-black text-white">
                         {{ $number }}
                     </span>
-                    <h3 class="text-lg font-black text-bali-navy">{{ $title }}</h3>
+                    <h3 class="mt-6 text-lg font-black text-bali-navy">{{ $title }}</h3>
                     <p class="mt-3 leading-7 text-bali-muted">{{ $description }}</p>
                 </div>
             @endforeach
@@ -184,62 +221,52 @@
     </div>
 </section>
 
-<section id="keunggulan" class="py-20">
-    <div class="mx-auto grid w-[min(1180px,92%)] items-center gap-12 lg:grid-cols-[1fr_0.85fr]">
+<section id="keunggulan" class="py-24">
+    <div class="container-page grid items-center gap-12 lg:grid-cols-[1fr_0.9fr]">
         <div>
-            <span class="mb-3 inline-flex text-xs font-black uppercase tracking-[0.18em] text-bali-teal">
-                Keunggulan
-            </span>
-            <h2 class="text-4xl font-black tracking-[-0.04em] text-bali-navy md:text-5xl">
-                Digitalisasi Penyewaan Motor yang Lebih Efisien
+            <span class="badge-teal">Keunggulan</span>
+            <h2 class="mt-4 text-4xl font-black tracking-[-0.04em] text-bali-navy md:text-5xl">
+                Website rental yang fokus ke proses, bukan sekadar pajangan.
             </h2>
             <p class="mt-5 leading-8 text-bali-muted">
-                Website ini dirancang untuk menggantikan proses manual melalui chat menjadi proses pemesanan
-                yang lebih rapi, tercatat, dan mudah dipantau.
+                Sistem membantu admin dan penyewa mengurangi proses manual, memperjelas status,
+                dan menyimpan data transaksi secara lebih tertata.
             </p>
 
             <div class="mt-8 grid gap-5">
-                <div class="border-l-4 border-bali-teal pl-5">
+                <div class="rounded-2xl border-l-4 border-bali-teal bg-white p-5 shadow-sm">
                     <strong class="text-bali-navy">Motor Tersedia dan Terdata</strong>
-                    <p class="mt-2 text-bali-muted">Admin dapat mengelola data motor dan status ketersediaan.</p>
+                    <p class="mt-2 text-bali-muted">Admin dapat mengelola data motor dan memantau status penyewaan.</p>
                 </div>
-                <div class="border-l-4 border-bali-teal pl-5">
-                    <strong class="text-bali-navy">Dokumen Penyewa Tersimpan</strong>
-                    <p class="mt-2 text-bali-muted">Paspor, visa, SIM, dan tanda tangan digital dapat dikelola melalui sistem.</p>
+                <div class="rounded-2xl border-l-4 border-bali-orange bg-white p-5 shadow-sm">
+                    <strong class="text-bali-navy">Pembayaran Diverifikasi</strong>
+                    <p class="mt-2 text-bali-muted">Bukti pembayaran dikirim oleh penyewa dan dikonfirmasi oleh admin.</p>
                 </div>
-                <div class="border-l-4 border-bali-teal pl-5">
+                <div class="rounded-2xl border-l-4 border-bali-teal bg-white p-5 shadow-sm">
                     <strong class="text-bali-navy">Status Penyewaan Jelas</strong>
-                    <p class="mt-2 text-bali-muted">Penyewa dapat melihat status pengajuan, pembayaran, pengantaran, dan selesai.</p>
+                    <p class="mt-2 text-bali-muted">Setiap booking memiliki status yang dapat dipantau dari dashboard.</p>
                 </div>
             </div>
         </div>
 
-        <div class="grid gap-5 rounded-[2rem] border border-bali-line bg-gradient-to-br from-teal-50 to-orange-50 p-7 shadow-2xl">
-            <div class="rounded-3xl border border-bali-line bg-white p-6">
-                <strong class="block text-bali-navy">Online Booking</strong>
-                <span class="mt-2 block text-sm text-bali-muted">Pengajuan sewa tercatat otomatis.</span>
-            </div>
-            <div class="rounded-3xl border border-bali-line bg-white p-6">
-                <strong class="block text-bali-navy">Cash / Digital</strong>
-                <span class="mt-2 block text-sm text-bali-muted">Metode pembayaran lebih fleksibel.</span>
-            </div>
-            <div class="rounded-3xl border border-bali-line bg-white p-6">
-                <strong class="block text-bali-navy">Delivery Fee</strong>
-                <span class="mt-2 block text-sm text-bali-muted">Biaya pengantaran dapat dihitung dalam total sewa.</span>
+        <div class="surface-card rounded-[2rem] p-7">
+            <div class="grid gap-5">
+                <div class="rounded-3xl bg-bali-navy p-6 text-white">
+                    <span class="text-sm font-bold text-slate-300">Operational Flow</span>
+                    <strong class="mt-2 block text-2xl font-black">Booking → Payment → Delivery</strong>
+                </div>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div class="rounded-3xl bg-slate-100 p-6">
+                        <strong class="block text-bali-navy">User Dashboard</strong>
+                        <span class="mt-2 block text-sm text-bali-muted">Pantau booking dan pembayaran.</span>
+                    </div>
+                    <div class="rounded-3xl bg-orange-50 p-6">
+                        <strong class="block text-bali-navy">Admin Panel</strong>
+                        <span class="mt-2 block text-sm text-bali-muted">Verifikasi booking dan pembayaran.</span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</section>
-
-<section class="pb-20">
-    <div class="mx-auto flex w-[min(1180px,92%)] flex-col gap-6 rounded-[2rem] bg-gradient-to-br from-bali-teal to-bali-navy p-10 text-white shadow-2xl md:flex-row md:items-center md:justify-between">
-        <div>
-            <h2 class="text-3xl font-black tracking-[-0.03em]">Siap Menjelajahi Bali dengan Motor Pilihan Anda?</h2>
-            <p class="mt-3 text-slate-200">Lihat motor yang tersedia dan mulai ajukan penyewaan secara online.</p>
-        </div>
-        <a href="{{ route('motorcycles.index') }}" class="rounded-full bg-bali-orange px-7 py-4 text-center text-sm font-black text-white hover:bg-bali-orange-dark">
-            Mulai Sewa
-        </a>
     </div>
 </section>
 @endsection
