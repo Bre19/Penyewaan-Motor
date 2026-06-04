@@ -16,18 +16,4 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
-
-Route::get('/catalog', function () {
-    return view('catalog');
-})->name('catalog');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-
-require __DIR__.'/auth.php';
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
