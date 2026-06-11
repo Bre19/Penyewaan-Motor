@@ -70,6 +70,18 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])
             ->name('payments.reject');
+        
+        Route::get('/bookings/{booking}/handover', [AdminBookingController::class, 'handover'])
+            ->name('bookings.handover');
+
+        Route::patch('/bookings/{booking}/handover', [AdminBookingController::class, 'storeHandover'])
+            ->name('bookings.storeHandover');
+
+        Route::get('/bookings/{booking}/complete', [AdminBookingController::class, 'complete'])
+            ->name('bookings.complete');
+
+        Route::patch('/bookings/{booking}/complete', [AdminBookingController::class, 'storeCompletion'])
+            ->name('bookings.storeCompletion');
     });
 
 require __DIR__ . '/auth.php';

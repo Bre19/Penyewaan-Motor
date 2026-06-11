@@ -76,8 +76,9 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('bookings.store', $motorcycle) }}" class="space-y-6">
+            <form id="bookingForm" method="POST" action="{{ route('bookings.store', $motorcycle) }}" class="space-y-6">
                 @csrf
+                <input type="hidden" id="termsAcceptedInput" name="terms_accepted" value="0">
 
                 <div class="grid gap-5 md:grid-cols-2">
                     <div>
@@ -144,7 +145,7 @@
                 </div>
 
                 <div class="flex flex-col gap-3 border-t border-bali-line pt-6 sm:flex-row">
-                    <button type="submit" class="btn-primary">
+                    <button type="button" id="openTermsModal" class="btn-primary">
                         Kirim Pengajuan
                     </button>
 
@@ -156,4 +157,151 @@
         </div>
     </div>
 </section>
+<div id="termsModal" class="fixed inset-0 z-[999] hidden items-center justify-center bg-slate-950/70 px-4">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-2xl">
+        <div class="border-b border-bali-line p-6">
+            <span class="badge-orange">Terms & Condition</span>
+            <h2 class="mt-4 text-2xl font-black text-bali-navy">
+                Aturan Penggunaan Motor Selama Masa Sewa
+            </h2>
+            <p class="mt-2 text-sm leading-7 text-bali-muted">
+                Baca seluruh ketentuan sampai selesai sebelum menyetujui pengajuan sewa.
+            </p>
+        </div>
+
+        <div id="termsContent" class="max-h-[420px] overflow-y-auto p-6 text-sm leading-8 text-bali-muted">
+            <h3 class="mb-3 text-lg font-black text-bali-navy">1. Kewajiban Penyewa</h3>
+            <p>
+                Penyewa wajib menggunakan motor secara bertanggung jawab, mematuhi peraturan lalu lintas,
+                menggunakan helm, membawa identitas yang diperlukan, dan menjaga kondisi motor selama masa sewa.
+            </p>
+
+            <h3 class="mb-3 mt-6 text-lg font-black text-bali-navy">2. Keselamatan Berkendara</h3>
+            <ul class="list-disc space-y-2 pl-5">
+                <li>Penyewa wajib menggunakan helm selama berkendara.</li>
+                <li>Penyewa dilarang berkendara secara ugal-ugalan atau membahayakan pengguna jalan lain.</li>
+                <li>Penyewa dilarang mengendarai motor dalam pengaruh alkohol, narkoba, atau kondisi tidak layak berkendara.</li>
+                <li>Penyewa wajib mematuhi rambu lalu lintas, batas kecepatan, dan aturan jalan setempat.</li>
+                <li>Penyewa dilarang membawa penumpang melebihi kapasitas motor.</li>
+            </ul>
+
+            <h3 class="mb-3 mt-6 text-lg font-black text-bali-navy">3. Dokumen dan Kelayakan</h3>
+            <p>
+                Penyewa bertanggung jawab atas kebenaran data diri, nomor paspor, status SIM,
+                nomor telepon, dan alamat tempat tinggal saat ini. Admin berhak menolak pengajuan
+                apabila data dianggap tidak valid atau tidak memenuhi ketentuan.
+            </p>
+
+            <h3 class="mb-3 mt-6 text-lg font-black text-bali-navy">4. Kerusakan dan Pelanggaran</h3>
+            <ul class="list-disc space-y-2 pl-5">
+                <li>Kerusakan akibat kelalaian penyewa menjadi tanggung jawab penyewa.</li>
+                <li>Denda atau sanksi akibat pelanggaran lalu lintas menjadi tanggung jawab penyewa.</li>
+                <li>Laporan berkendara ugal-ugalan dapat memengaruhi Safety Score dan pengajuan berikutnya.</li>
+                <li>Admin berhak mencatat pelanggaran sebagai bagian dari evaluasi penyewaan.</li>
+            </ul>
+
+            <h3 class="mb-3 mt-6 text-lg font-black text-bali-navy">5. Pengembalian Motor</h3>
+            <p>
+                Motor wajib dikembalikan sesuai jadwal, lokasi, dan kondisi yang disepakati.
+                Apabila terdapat keterlambatan, kerusakan, atau kehilangan perlengkapan,
+                penyewa dapat dikenakan biaya tambahan.
+            </p>
+
+            <h3 class="mb-3 mt-6 text-lg font-black text-bali-navy">6. Persetujuan Digital</h3>
+            <p>
+                Dengan menyetujui ketentuan ini, penyewa menyatakan telah membaca, memahami,
+                dan bersedia mematuhi seluruh aturan selama masa penyewaan motor.
+            </p>
+        </div>
+
+        <div class="border-t border-bali-line p-6">
+            <label class="flex items-start gap-3 rounded-2xl bg-slate-100 p-4 text-sm font-semibold text-bali-muted">
+                <input
+                    id="termsCheckbox"
+                    type="checkbox"
+                    disabled
+                    class="mt-1 h-4 w-4 rounded border-bali-line text-bali-teal focus:ring-bali-teal"
+                >
+                <span>
+                    Saya telah membaca seluruh Terms & Condition dan setuju untuk mematuhi aturan selama masa sewa.
+                    Checkbox ini aktif setelah Anda scroll sampai bagian akhir. Ya, harus dibaca. Peradaban menuntut sedikit usaha.
+                </span>
+            </label>
+
+            @error('terms_accepted')
+                <p class="mt-3 text-sm font-bold text-red-600">{{ $message }}</p>
+            @enderror
+
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button type="button" id="closeTermsModal" class="btn-light">
+                    Tolak / Kembali
+                </button>
+
+                <button type="button" id="submitBookingButton" class="btn-primary disabled:cursor-not-allowed disabled:opacity-50" disabled>
+                    Setuju dan Kirim Pengajuan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('bookingForm');
+        const modal = document.getElementById('termsModal');
+        const openButton = document.getElementById('openTermsModal');
+        const closeButton = document.getElementById('closeTermsModal');
+        const termsContent = document.getElementById('termsContent');
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        const submitButton = document.getElementById('submitBookingButton');
+        const termsAcceptedInput = document.getElementById('termsAcceptedInput');
+
+        const openModal = () => {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            termsContent.scrollTop = 0;
+            termsCheckbox.checked = false;
+            termsCheckbox.disabled = true;
+            submitButton.disabled = true;
+            termsAcceptedInput.value = '0';
+        };
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            termsAcceptedInput.value = '0';
+        };
+
+        openButton.addEventListener('click', openModal);
+        closeButton.addEventListener('click', closeModal);
+
+        termsContent.addEventListener('scroll', () => {
+            const reachedBottom = termsContent.scrollTop + termsContent.clientHeight >= termsContent.scrollHeight - 10;
+
+            if (reachedBottom) {
+                termsCheckbox.disabled = false;
+            }
+        });
+
+        termsCheckbox.addEventListener('change', () => {
+            submitButton.disabled = !termsCheckbox.checked;
+        });
+
+        submitButton.addEventListener('click', () => {
+            if (!termsCheckbox.checked) {
+                return;
+            }
+
+            termsAcceptedInput.value = '1';
+            form.submit();
+        });
+
+        form.addEventListener('submit', (event) => {
+            if (termsAcceptedInput.value !== '1') {
+                event.preventDefault();
+                openModal();
+            }
+        });
+    });
+</script>
 @endsection

@@ -24,6 +24,8 @@ class Booking extends Model
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
 
+    public const TERMS_VERSION = 'v1.0';
+
     protected $fillable = [
         'user_id',
         'motorcycle_id',
@@ -36,6 +38,9 @@ class Booking extends Model
         'price_per_day',
         'total_price',
         'status',
+        'terms_accepted_at',
+        'terms_version',
+        'terms_ip_address',
         'approved_at',
         'rejected_at',
         'rejection_reason',
@@ -49,6 +54,7 @@ class Booking extends Model
             'end_date' => 'date',
             'price_per_day' => 'decimal:2',
             'total_price' => 'decimal:2',
+            'terms_accepted_at' => 'datetime',
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
             'cancelled_at' => 'datetime',
@@ -124,6 +130,29 @@ class Booking extends Model
         ], true);
     }
 
+    public function canUploadPaymentProof(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_APPROVED,
+            self::STATUS_WAITING_PAYMENT,
+        ], true);
+    }
+
+    public function canBeHandedOverByAdmin(): bool
+    {
+        return $this->status === self::STATUS_PAYMENT_CONFIRMED;
+    }
+
+    public function canBeCompletedByAdmin(): bool
+    {
+        return $this->status === self::STATUS_ONGOING;
+    }
+
+    public function hasAcceptedTerms(): bool
+    {
+        return $this->terms_accepted_at !== null;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -134,14 +163,6 @@ class Booking extends Model
         return $this->belongsTo(Motorcycle::class);
     }
 
-    public function canUploadPaymentProof(): bool
-    {
-        return in_array($this->status, [
-            self::STATUS_APPROVED,
-            self::STATUS_WAITING_PAYMENT,
-        ], true);
-    }
-
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
@@ -150,5 +171,15 @@ class Booking extends Model
     public function latestPayment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    public function rentalChecklist(): HasOne
+    {
+        return $this->hasOne(RentalChecklist::class);
+    }
+
+    public function rentalSafetyScore(): HasOne
+    {
+        return $this->hasOne(RentalSafetyScore::class);
     }
 }

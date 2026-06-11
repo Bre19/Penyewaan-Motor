@@ -159,6 +159,19 @@
             <aside class="surface-card rounded-[2rem] p-8">
                 <span class="badge-teal">Profil Penyewa</span>
                 <h2 class="mt-4 text-2xl font-black text-bali-navy">Data verifikasi</h2>
+                @if ($user->hasTrustedRiderBadge())
+                    <div class="mt-5 rounded-[1.5rem] border border-teal-200 bg-teal-50 p-5">
+                        <span class="block text-xs font-black uppercase tracking-[0.18em] text-bali-teal-dark">
+                            Badge
+                        </span>
+                        <strong class="mt-2 block text-xl font-black text-bali-navy">
+                            Trusted Rider
+                        </strong>
+                        <p class="mt-2 text-sm leading-7 text-bali-muted">
+                            Anda memiliki riwayat berkendara aman berdasarkan evaluasi rental sebelumnya.
+                        </p>
+                    </div>
+                @endif
                 <p class="mt-2 text-sm leading-7 text-bali-muted">
                     Data ini membantu admin menilai pengajuan sewa.
                 </p>

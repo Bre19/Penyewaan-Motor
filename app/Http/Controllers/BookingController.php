@@ -26,6 +26,9 @@ class BookingController extends Controller
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'delivery_location' => ['required', 'string', 'max:255'],
             'customer_note' => ['nullable', 'string', 'max:1000'],
+            'terms_accepted' => ['accepted'],
+        ], [
+            'terms_accepted.accepted' => 'Anda harus menyetujui Terms & Condition sebelum mengajukan sewa.',
         ]);
 
         $startDate = Carbon::parse($validated['start_date'])->startOfDay();
@@ -52,6 +55,9 @@ class BookingController extends Controller
             'price_per_day' => $pricePerDay,
             'total_price' => $totalPrice,
             'status' => Booking::STATUS_PENDING_APPROVAL,
+            'terms_accepted_at' => now(),
+            'terms_version' => Booking::TERMS_VERSION,
+            'terms_ip_address' => $request->ip(),
         ]);
 
         return redirect()
@@ -63,7 +69,7 @@ class BookingController extends Controller
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
 
-        $booking->load(['motorcycle', 'latestPayment']);
+        $booking->load(['motorcycle', 'latestPayment', 'rentalChecklist', 'rentalSafetyScore']);
 
         return view('bookings.show', compact('booking'));
     }

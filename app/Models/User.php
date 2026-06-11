@@ -24,6 +24,7 @@ class User extends Authenticatable
         'has_license',
         'role',
         'status',
+        'trusted_rider_at',
     ];
 
     protected $hidden = [
@@ -37,6 +38,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'has_license' => 'boolean',
+            'trusted_rider_at' => 'datetime',
         ];
     }
 
@@ -50,6 +52,16 @@ class User extends Authenticatable
         return $this->hasMany(Booking::class);
     }
 
+    public function evaluatedSafetyScores(): HasMany
+    {
+        return $this->hasMany(RentalSafetyScore::class, 'evaluated_by');
+    }
+
+    public function checkedRentalChecklists(): HasMany
+    {
+        return $this->hasMany(RentalChecklist::class, 'checked_by');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -58,5 +70,10 @@ class User extends Authenticatable
     public function isCustomer(): bool
     {
         return $this->role === 'customer';
+    }
+
+    public function hasTrustedRiderBadge(): bool
+    {
+        return $this->trusted_rider_at !== null;
     }
 }
