@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard Admin')
 
 @section('content')
-<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
+<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
     <div class="rounded-[1.7rem] border border-bali-line bg-white p-6 shadow-sm">
         <span class="text-sm font-bold text-bali-muted">Menunggu Verifikasi</span>
         <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $stats['pending_bookings'] }}</strong>
@@ -20,13 +20,25 @@
     </div>
 
     <div class="rounded-[1.7rem] border border-bali-line bg-white p-6 shadow-sm">
-        <span class="text-sm font-bold text-bali-muted">Motor Tersedia</span>
+        <span class="text-sm font-bold text-bali-muted">Penyewa</span>
+        <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $stats['customers'] }}</strong>
+    </div>
+</div>
+
+<div class="mt-6 grid gap-6 md:grid-cols-3">
+    <div class="rounded-[1.7rem] border border-teal-200 bg-teal-50 p-6 shadow-sm">
+        <span class="text-sm font-bold text-bali-muted">Motor Available</span>
         <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $stats['available_motorcycles'] }}</strong>
     </div>
 
-    <div class="rounded-[1.7rem] border border-bali-line bg-white p-6 shadow-sm">
-        <span class="text-sm font-bold text-bali-muted">Penyewa</span>
-        <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $stats['customers'] }}</strong>
+    <div class="rounded-[1.7rem] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+        <span class="text-sm font-bold text-bali-muted">Motor Maintenance</span>
+        <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $stats['maintenance_motorcycles'] }}</strong>
+    </div>
+
+    <div class="rounded-[1.7rem] border border-slate-200 bg-slate-100 p-6 shadow-sm">
+        <span class="text-sm font-bold text-bali-muted">Motor Unavailable</span>
+        <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $stats['unavailable_motorcycles'] }}</strong>
     </div>
 </div>
 
