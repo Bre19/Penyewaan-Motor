@@ -62,9 +62,55 @@ class BookingController extends Controller
             'latestPayment',
             'rentalChecklist',
             'rentalSafetyScore',
+            'statusHistories.changedBy',
         ]);
 
-        return view('admin.bookings.show', compact('booking'));
+        $completedRentals = Booking::where('user_id', $booking->user_id)
+            ->where('id', '!=', $booking->id)
+            ->where('status', Booking::STATUS_COMPLETED)
+            ->count();
+
+        $hasRoadReport = RentalSafetyScore::whereHas('booking', function ($query) use ($booking) {
+            $query->where('user_id', $booking->user_id);
+        })->where('reckless_report', true)->exists();
+
+        $hasDamage = RentalSafetyScore::whereHas('booking', function ($query) use ($booking) {
+            $query->where('user_id', $booking->user_id);
+        })->where('negligent_damage', true)->exists();
+
+        $riskReasons = [];
+        $riskLabel = 'Low Risk';
+        $riskClass = 'border-teal-200 bg-teal-50 text-teal-800';
+
+        if ($completedRentals === 0) {
+            $riskReasons[] = 'Penyewa baru, belum memiliki riwayat rental selesai.';
+            $riskLabel = 'Medium Risk';
+            $riskClass = 'border-amber-200 bg-amber-50 text-amber-800';
+        } else {
+            $riskReasons[] = 'Pernah menyelesaikan rental sebelumnya.';
+        }
+
+        if ($booking->user->hasTrustedRiderBadge()) {
+            $riskReasons[] = 'Pernah mendapat badge Trusted Rider.';
+            $riskLabel = 'Low Risk';
+            $riskClass = 'border-teal-200 bg-teal-50 text-teal-800';
+        } else {
+            $riskReasons[] = 'Belum memiliki badge Trusted Rider.';
+        }
+
+        if ($hasRoadReport) {
+            $riskReasons[] = 'Pernah mendapat laporan perilaku berkendara tidak aman.';
+            $riskLabel = 'High Risk';
+            $riskClass = 'border-red-200 bg-red-50 text-red-800';
+        }
+
+        if ($hasDamage) {
+            $riskReasons[] = 'Pernah ada kerusakan akibat kelalaian.';
+            $riskLabel = 'High Risk';
+            $riskClass = 'border-red-200 bg-red-50 text-red-800';
+        }
+
+        return view('admin.bookings.show', compact('booking', 'riskReasons', 'riskLabel', 'riskClass'));
     }
 
     public function approve(Booking $booking)
@@ -73,12 +119,16 @@ class BookingController extends Controller
             return back()->with('error', 'Booking ini tidak berada pada status menunggu persetujuan.');
         }
 
+        $oldStatus = $booking->status;
+
         $booking->update([
             'status' => Booking::STATUS_WAITING_PAYMENT,
             'approved_at' => now(),
             'rejected_at' => null,
             'rejection_reason' => null,
         ]);
+
+        $booking->recordStatusHistory($oldStatus, Booking::STATUS_WAITING_PAYMENT, auth()->id(), 'Booking disetujui oleh admin.');
 
         return redirect()
             ->route('admin.bookings.show', $booking)
@@ -95,11 +145,15 @@ class BookingController extends Controller
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
 
+        $oldStatus = $booking->status;
+
         $booking->update([
             'status' => Booking::STATUS_REJECTED,
             'rejected_at' => now(),
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+
+        $booking->recordStatusHistory($oldStatus, Booking::STATUS_REJECTED, $request->user()->id, $validated['rejection_reason']);
 
         return redirect()
             ->route('admin.bookings.show', $booking)
@@ -144,6 +198,8 @@ class BookingController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $booking, $validated) {
+            $oldStatus = $booking->status;
+
             $motorcycleConditionPhoto = $request->file('motorcycle_condition_photo')
                 ->store('rental-checklists', 'public');
 
@@ -170,6 +226,8 @@ class BookingController extends Controller
             $booking->update([
                 'status' => Booking::STATUS_ONGOING,
             ]);
+
+            $booking->recordStatusHistory($oldStatus, Booking::STATUS_ONGOING, $request->user()->id, 'Checklist serah-terima selesai dan motor mulai disewa.');
         });
 
         return redirect()
@@ -207,31 +265,18 @@ class BookingController extends Controller
 
         $negligentDamage = $request->boolean('negligent_damage');
         $recklessReport = $request->boolean('reckless_report');
-
         $noViolationReport = $request->boolean('no_violation_report');
 
         if ($negligentDamage || $recklessReport) {
             $noViolationReport = false;
         }
 
-        $score = RentalSafetyScore::calculateScore(
-            $noViolationReport,
-            $negligentDamage,
-            $recklessReport
-        );
-
+        $score = RentalSafetyScore::calculateScore($noViolationReport, $negligentDamage, $recklessReport);
         $badgeAwarded = RentalSafetyScore::isTrustedRiderScore($score);
 
-        DB::transaction(function () use (
-            $request,
-            $booking,
-            $validated,
-            $noViolationReport,
-            $negligentDamage,
-            $recklessReport,
-            $score,
-            $badgeAwarded
-        ) {
+        DB::transaction(function () use ($request, $booking, $validated, $noViolationReport, $negligentDamage, $recklessReport, $score, $badgeAwarded) {
+            $oldStatus = $booking->status;
+
             RentalSafetyScore::create([
                 'booking_id' => $booking->id,
                 'evaluated_by' => $request->user()->id,
@@ -247,6 +292,8 @@ class BookingController extends Controller
             $booking->update([
                 'status' => Booking::STATUS_COMPLETED,
             ]);
+
+            $booking->recordStatusHistory($oldStatus, Booking::STATUS_COMPLETED, $request->user()->id, 'Rental diselesaikan dan safety score dihitung.');
 
             if ($badgeAwarded && ! $booking->user->trusted_rider_at) {
                 $booking->user->forceFill([
