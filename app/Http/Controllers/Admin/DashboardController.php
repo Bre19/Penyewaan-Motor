@@ -16,6 +16,8 @@ class DashboardController extends Controller
             'active_bookings' => Booking::whereNotIn('status', Booking::finalStatuses())->count(),
             'completed_bookings' => Booking::where('status', Booking::STATUS_COMPLETED)->count(),
             'available_motorcycles' => Motorcycle::where('status', 'available')->count(),
+            'maintenance_motorcycles' => Motorcycle::where('status', 'maintenance')->count(),
+            'unavailable_motorcycles' => Motorcycle::where('status', 'unavailable')->count(),
             'customers' => User::where('role', 'customer')->count(),
         ];
 
