@@ -153,6 +153,16 @@ class Booking extends Model
         return $this->terms_accepted_at !== null;
     }
 
+    public function recordStatusHistory(?string $from, string $to, ?int $changedBy = null, ?string $note = null): void
+    {
+        $this->statusHistories()->create([
+            'changed_by' => $changedBy,
+            'status_from' => $from,
+            'status_to' => $to,
+            'note' => $note,
+        ]);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -181,5 +191,10 @@ class Booking extends Model
     public function rentalSafetyScore(): HasOne
     {
         return $this->hasOne(RentalSafetyScore::class);
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(BookingStatusHistory::class)->latest();
     }
 }
