@@ -70,6 +70,8 @@ class PaymentController extends Controller
         }
 
         DB::transaction(function () use ($payment) {
+            $oldStatus = $payment->booking->status;
+
             $payment->update([
                 'status' => Payment::STATUS_CONFIRMED,
                 'verified_at' => now(),
@@ -80,6 +82,8 @@ class PaymentController extends Controller
             $payment->booking->update([
                 'status' => Booking::STATUS_PAYMENT_CONFIRMED,
             ]);
+
+            $payment->booking->recordStatusHistory($oldStatus, Booking::STATUS_PAYMENT_CONFIRMED, auth()->id(), 'Pembayaran dikonfirmasi oleh admin.');
         });
 
         return redirect()
@@ -98,6 +102,8 @@ class PaymentController extends Controller
         ]);
 
         DB::transaction(function () use ($payment, $validated) {
+            $oldStatus = $payment->booking->status;
+
             $payment->update([
                 'status' => Payment::STATUS_REJECTED,
                 'rejected_at' => now(),
@@ -107,6 +113,8 @@ class PaymentController extends Controller
             $payment->booking->update([
                 'status' => Booking::STATUS_WAITING_PAYMENT,
             ]);
+
+            $payment->booking->recordStatusHistory($oldStatus, Booking::STATUS_WAITING_PAYMENT, auth()->id(), $validated['rejection_reason']);
         });
 
         return redirect()
