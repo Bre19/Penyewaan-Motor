@@ -12,14 +12,14 @@ class BookingController extends Controller
 {
     public function create(Motorcycle $motorcycle)
     {
-        abort_unless($motorcycle->status === 'available', 404);
+        abort_unless($motorcycle->status === Motorcycle::STATUS_AVAILABLE, 404);
 
         return view('bookings.create', compact('motorcycle'));
     }
 
     public function store(Request $request, Motorcycle $motorcycle)
     {
-        abort_unless($motorcycle->status === 'available', 404);
+        abort_unless($motorcycle->status === Motorcycle::STATUS_AVAILABLE, 404);
 
         $validated = $request->validate([
             'start_date' => ['required', 'date', 'after_or_equal:today'],
@@ -60,6 +60,8 @@ class BookingController extends Controller
             'terms_ip_address' => $request->ip(),
         ]);
 
+        $booking->recordStatusHistory(null, Booking::STATUS_PENDING_APPROVAL, $request->user()->id, 'Booking dibuat oleh penyewa.');
+
         return redirect()
             ->route('bookings.show', $booking)
             ->with('success', 'Pengajuan penyewaan berhasil dikirim dan menunggu persetujuan admin.');
@@ -69,7 +71,7 @@ class BookingController extends Controller
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
 
-        $booking->load(['motorcycle', 'latestPayment', 'rentalChecklist', 'rentalSafetyScore']);
+        $booking->load(['motorcycle', 'latestPayment', 'rentalChecklist', 'rentalSafetyScore', 'statusHistories.changedBy']);
 
         return view('bookings.show', compact('booking'));
     }
@@ -82,10 +84,14 @@ class BookingController extends Controller
             return back()->with('error', 'Booking ini sudah tidak dapat dibatalkan oleh penyewa.');
         }
 
+        $oldStatus = $booking->status;
+
         $booking->update([
             'status' => Booking::STATUS_CANCELLED,
             'cancelled_at' => now(),
         ]);
+
+        $booking->recordStatusHistory($oldStatus, Booking::STATUS_CANCELLED, $request->user()->id, 'Booking dibatalkan oleh penyewa.');
 
         return redirect()
             ->route('dashboard')
