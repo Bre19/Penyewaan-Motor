@@ -10,6 +10,10 @@ class Motorcycle extends Model
 {
     use HasFactory;
 
+    public const STATUS_AVAILABLE = 'available';
+    public const STATUS_MAINTENANCE = 'maintenance';
+    public const STATUS_UNAVAILABLE = 'unavailable';
+
     protected $fillable = [
         'brand',
         'model',
@@ -27,6 +31,20 @@ class Motorcycle extends Model
         return [
             'price_per_day' => 'decimal:2',
         ];
+    }
+
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_AVAILABLE => 'Available',
+            self::STATUS_MAINTENANCE => 'Maintenance',
+            self::STATUS_UNAVAILABLE => 'Unavailable',
+        ];
+    }
+
+    public function statusLabel(): string
+    {
+        return self::statusLabels()[$this->status] ?? 'Unknown';
     }
 
     public function bookings(): HasMany
