@@ -2,11 +2,12 @@
 
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\MotorcycleController as AdminMotorcycleController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MotorcycleController;
-use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,19 +59,7 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])
             ->name('bookings.reject');
-            
-        Route::get('/payments', [AdminPaymentController::class, 'index'])
-            ->name('payments.index');
 
-        Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])
-            ->name('payments.show');
-
-        Route::patch('/payments/{payment}/confirm', [AdminPaymentController::class, 'confirm'])
-            ->name('payments.confirm');
-
-        Route::patch('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])
-            ->name('payments.reject');
-        
         Route::get('/bookings/{booking}/handover', [AdminBookingController::class, 'handover'])
             ->name('bookings.handover');
 
@@ -82,6 +71,21 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('/bookings/{booking}/complete', [AdminBookingController::class, 'storeCompletion'])
             ->name('bookings.storeCompletion');
+
+        Route::resource('motorcycles', AdminMotorcycleController::class)
+            ->except(['show', 'destroy']);
+
+        Route::get('/payments', [AdminPaymentController::class, 'index'])
+            ->name('payments.index');
+
+        Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])
+            ->name('payments.show');
+
+        Route::patch('/payments/{payment}/confirm', [AdminPaymentController::class, 'confirm'])
+            ->name('payments.confirm');
+
+        Route::patch('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])
+            ->name('payments.reject');
     });
 
 require __DIR__ . '/auth.php';
