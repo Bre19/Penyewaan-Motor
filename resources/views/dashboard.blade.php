@@ -5,7 +5,7 @@
     $activeBadgeClass = $activeBooking
         ? match ($activeBooking->status) {
             \App\Models\Booking::STATUS_PENDING_APPROVAL => 'bg-amber-50 text-amber-700 border-amber-200',
-            \App\Models\Booking::STATUS_APPROVED => 'bg-blue-50 text-blue-700 border-blue-200',
+            \App\Models\Booking::STATUS_APPROVED,
             \App\Models\Booking::STATUS_WAITING_PAYMENT => 'bg-orange-50 text-orange-700 border-orange-200',
             \App\Models\Booking::STATUS_WAITING_PAYMENT_VERIFICATION => 'bg-purple-50 text-purple-700 border-purple-200',
             \App\Models\Booking::STATUS_PAYMENT_CONFIRMED => 'bg-teal-50 text-teal-700 border-teal-200',
@@ -16,91 +16,92 @@
         : 'bg-slate-100 text-slate-700 border-slate-200';
 @endphp
 
-<section class="bg-gradient-to-br from-bali-navy via-slate-900 to-blue-950 py-16 text-white">
-    <div class="mx-auto grid w-[min(1180px,92%)] gap-8 lg:grid-cols-[1fr_0.75fr] lg:items-end">
+<section class="relative overflow-hidden bg-bali-navy py-20 text-white">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(13,148,136,0.34),transparent_30rem),radial-gradient(circle_at_85%_10%,rgba(249,115,22,0.25),transparent_28rem)]"></div>
+
+    <div class="container-page relative grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
         <div>
-            <span class="mb-3 inline-flex text-xs font-black uppercase tracking-[0.18em] text-bali-teal">
+            <span class="badge-teal bg-white/10 text-teal-200">
                 Dashboard Penyewa
             </span>
-            <h1 class="text-4xl font-black tracking-[-0.04em]">
-                Selamat Datang, {{ $user->name }}
+            <h1 class="mt-5 text-5xl font-black leading-tight tracking-[-0.05em] md:text-6xl">
+                Halo, {{ $user->name }}
             </h1>
-            <p class="mt-4 max-w-2xl leading-8 text-slate-300">
-                Pantau pengajuan sewa, status pembayaran, dan progres penyewaan motor Anda.
+            <p class="mt-5 max-w-2xl leading-8 text-slate-300">
+                Pantau booking, status pembayaran, dan progres penyewaan motor dari satu halaman.
             </p>
         </div>
 
-        <div class="rounded-[1.7rem] border border-white/10 bg-white/10 p-6 backdrop-blur">
-            <span class="text-sm font-bold text-slate-300">Status akun</span>
-            <strong class="mt-2 block text-2xl font-black">
+        <div class="glass-panel rounded-[2rem] p-6">
+            <span class="text-xs font-black uppercase tracking-[0.18em] text-teal-200">Status Akun</span>
+            <strong class="mt-3 block text-2xl font-black">
                 {{ $profileCompleted ? 'Data Awal Lengkap' : 'Data Belum Lengkap' }}
             </strong>
-            <p class="mt-2 text-sm leading-6 text-slate-300">
-                Dokumen upload seperti paspor, visa, SIM, dan tanda tangan digital akan dilanjutkan pada tahap berikutnya.
+            <p class="mt-2 text-sm leading-7 text-slate-300">
+                Data profil digunakan sebagai dasar verifikasi booking oleh admin.
             </p>
         </div>
     </div>
 </section>
 
 <section class="py-16">
-    <div class="mx-auto w-[min(1180px,92%)]">
+    <div class="container-page">
         @if (session('success'))
-            <div class="mb-8 rounded-2xl border border-teal-200 bg-teal-50 p-5 text-sm font-semibold text-bali-teal-dark">
+            <div class="mb-8 rounded-2xl border border-teal-200 bg-teal-50 p-5 text-sm font-bold text-bali-teal-dark">
                 {{ session('success') }}
             </div>
         @endif
 
         @if (session('error'))
-            <div class="mb-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700">
+            <div class="mb-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold text-red-700">
                 {{ session('error') }}
             </div>
         @endif
 
         <div class="grid gap-6 md:grid-cols-3">
-            <div class="rounded-[1.7rem] border border-bali-line bg-white p-6 shadow-sm">
+            <div class="surface-card rounded-[1.7rem] p-6">
                 <span class="text-sm font-bold text-bali-muted">Total Pengajuan</span>
-                <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $bookingStats['total'] }}</strong>
-                <p class="mt-3 text-sm leading-6 text-bali-muted">Seluruh pengajuan sewa yang pernah dibuat.</p>
+                <strong class="mt-3 block text-4xl font-black text-bali-navy">{{ $bookingStats['total'] }}</strong>
+                <p class="mt-3 text-sm leading-6 text-bali-muted">Seluruh booking yang pernah dibuat.</p>
             </div>
 
-            <div class="rounded-[1.7rem] border border-bali-line bg-white p-6 shadow-sm">
-                <span class="text-sm font-bold text-bali-muted">Pengajuan Aktif</span>
-                <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $bookingStats['active'] }}</strong>
-                <p class="mt-3 text-sm leading-6 text-bali-muted">Pengajuan yang masih berjalan atau menunggu proses admin.</p>
+            <div class="surface-card rounded-[1.7rem] p-6">
+                <span class="text-sm font-bold text-bali-muted">Booking Aktif</span>
+                <strong class="mt-3 block text-4xl font-black text-bali-navy">{{ $bookingStats['active'] }}</strong>
+                <p class="mt-3 text-sm leading-6 text-bali-muted">Booking yang masih berjalan atau menunggu proses.</p>
             </div>
 
-            <div class="rounded-[1.7rem] border border-bali-line bg-white p-6 shadow-sm">
+            <div class="surface-card rounded-[1.7rem] p-6">
                 <span class="text-sm font-bold text-bali-muted">Sewa Selesai</span>
-                <strong class="mt-3 block text-3xl font-black text-bali-navy">{{ $bookingStats['completed'] }}</strong>
-                <p class="mt-3 text-sm leading-6 text-bali-muted">Penyewaan yang telah selesai.</p>
+                <strong class="mt-3 block text-4xl font-black text-bali-navy">{{ $bookingStats['completed'] }}</strong>
+                <p class="mt-3 text-sm leading-6 text-bali-muted">Transaksi penyewaan yang sudah selesai.</p>
             </div>
         </div>
 
         <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_0.75fr]">
-            <div class="rounded-[2rem] border border-bali-line bg-white p-8 shadow-xl">
+            <div class="surface-card rounded-[2rem] p-8">
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <h2 class="text-2xl font-black text-bali-navy">Booking Aktif</h2>
-                        <p class="mt-2 text-sm text-bali-muted">
-                            Status pengajuan terbaru yang masih perlu dipantau.
-                        </p>
+                        <span class="badge-orange">Booking Aktif</span>
+                        <h2 class="mt-4 text-3xl font-black text-bali-navy">Status penyewaan terbaru</h2>
                     </div>
 
-                    <a href="{{ route('motorcycles.index') }}"
-                       class="rounded-full bg-bali-orange px-6 py-3 text-center text-sm font-black text-white transition hover:bg-bali-orange-dark">
+                    <a href="{{ route('motorcycles.index') }}" class="btn-primary">
                         Cari Motor
                     </a>
                 </div>
 
                 @if ($activeBooking)
-                    <div class="mt-8 rounded-[1.7rem] border border-bali-line p-6">
+                    <div class="mt-8 rounded-[1.8rem] border border-bali-line bg-white p-6">
                         <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div>
-                                <span class="text-sm font-bold text-bali-muted">{{ $activeBooking->booking_code }}</span>
-                                <h3 class="mt-2 text-2xl font-black text-bali-navy">
+                                <span class="text-sm font-black uppercase tracking-wide text-bali-teal">
+                                    {{ $activeBooking->booking_code }}
+                                </span>
+                                <h3 class="mt-2 text-3xl font-black text-bali-navy">
                                     {{ $activeBooking->motorcycle->brand }} {{ $activeBooking->motorcycle->model }}
                                 </h3>
-                                <p class="mt-2 text-sm text-bali-muted">
+                                <p class="mt-2 font-semibold text-bali-muted">
                                     {{ $activeBooking->start_date->translatedFormat('d F Y') }}
                                     -
                                     {{ $activeBooking->end_date->translatedFormat('d F Y') }}
@@ -126,41 +127,56 @@
                             </div>
 
                             <div class="rounded-2xl bg-slate-100 p-4">
-                                <span class="block text-sm text-bali-muted">Lokasi</span>
-                                <strong class="mt-1 block text-bali-navy">{{ $activeBooking->delivery_location }}</strong>
+                                <span class="block text-sm text-bali-muted">Pembayaran</span>
+                                <strong class="mt-1 block text-bali-navy">
+                                    {{ $activeBooking->latestPayment?->statusLabel() ?? 'Belum Ada' }}
+                                </strong>
                             </div>
                         </div>
 
-                        <a href="{{ route('bookings.show', $activeBooking) }}"
-                           class="mt-6 inline-flex rounded-full bg-bali-navy px-6 py-3 text-sm font-black text-white transition hover:bg-bali-slate">
-                            Lihat Detail
-                        </a>
+                        <div class="mt-6 flex flex-wrap gap-3">
+                            <a href="{{ route('bookings.show', $activeBooking) }}" class="btn-dark">
+                                Lihat Detail
+                            </a>
+
+                            @if ($activeBooking->canUploadPaymentProof())
+                                <a href="{{ route('payments.create', $activeBooking) }}" class="btn-primary">
+                                    Upload Pembayaran
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 @else
-                    <div class="mt-8 rounded-[1.7rem] border border-dashed border-bali-line p-8 text-center">
-                        <h3 class="text-xl font-black text-bali-navy">Belum ada booking aktif</h3>
-                        <p class="mt-2 text-bali-muted">
+                    <div class="mt-8 rounded-[1.8rem] border border-dashed border-bali-line bg-white p-10 text-center">
+                        <h3 class="text-2xl font-black text-bali-navy">Belum ada booking aktif</h3>
+                        <p class="mt-3 text-bali-muted">
                             Pilih motor dari katalog lalu ajukan penyewaan.
                         </p>
                     </div>
                 @endif
             </div>
 
-            <aside class="rounded-[2rem] border border-bali-line bg-white p-8 shadow-xl">
-                <h2 class="text-2xl font-black text-bali-navy">Status Dokumen</h2>
+            <aside class="surface-card rounded-[2rem] p-8">
+                <span class="badge-teal">Profil Penyewa</span>
+                <h2 class="mt-4 text-2xl font-black text-bali-navy">Data verifikasi</h2>
                 <p class="mt-2 text-sm leading-7 text-bali-muted">
-                    Data awal penyewa sudah dipakai untuk proses booking. Upload dokumen lengkap akan masuk tahap berikutnya.
+                    Data ini membantu admin menilai pengajuan sewa.
                 </p>
 
                 <div class="mt-6 grid gap-3">
                     <div class="flex items-center justify-between rounded-2xl bg-slate-100 p-4">
-                        <span class="text-sm font-bold text-bali-muted">Nomor Paspor</span>
+                        <span class="text-sm font-bold text-bali-muted">Telepon</span>
+                        <strong class="text-sm text-bali-navy">{{ $user->phone_number ?: '-' }}</strong>
+                    </div>
+
+                    <div class="flex items-center justify-between rounded-2xl bg-slate-100 p-4">
+                        <span class="text-sm font-bold text-bali-muted">Paspor</span>
                         <strong class="text-sm text-bali-navy">{{ filled($user->passport_number) ? 'Ada' : 'Belum Ada' }}</strong>
                     </div>
 
                     <div class="flex items-center justify-between rounded-2xl bg-slate-100 p-4">
-                        <span class="text-sm font-bold text-bali-muted">Negara Asal</span>
-                        <strong class="text-sm text-bali-navy">{{ filled($user->origin_country) ? $user->origin_country : 'Belum Ada' }}</strong>
+                        <span class="text-sm font-bold text-bali-muted">Negara</span>
+                        <strong class="text-sm text-bali-navy">{{ $user->origin_country ?: '-' }}</strong>
                     </div>
 
                     <div class="flex items-center justify-between rounded-2xl bg-slate-100 p-4">
@@ -171,18 +187,23 @@
             </aside>
         </div>
 
-        <div class="mt-8 rounded-[2rem] border border-bali-line bg-white p-8 shadow-xl">
-            <h2 class="text-2xl font-black text-bali-navy">Riwayat Booking</h2>
+        <div class="mt-8 surface-card rounded-[2rem] p-8">
+            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <span class="badge-teal">Riwayat</span>
+                    <h2 class="mt-4 text-3xl font-black text-bali-navy">Riwayat Booking</h2>
+                </div>
+            </div>
 
-            <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-bali-line">
+            <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-bali-line bg-white">
                 @forelse ($latestBookings as $booking)
                     <div class="flex flex-col gap-4 border-b border-bali-line p-5 last:border-b-0 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <span class="text-sm font-bold text-bali-muted">{{ $booking->booking_code }}</span>
-                            <h3 class="mt-1 font-black text-bali-navy">
+                            <span class="text-sm font-black uppercase tracking-wide text-bali-teal">{{ $booking->booking_code }}</span>
+                            <h3 class="mt-1 text-lg font-black text-bali-navy">
                                 {{ $booking->motorcycle->brand }} {{ $booking->motorcycle->model }}
                             </h3>
-                            <p class="mt-1 text-sm text-bali-muted">
+                            <p class="mt-1 text-sm font-semibold text-bali-muted">
                                 {{ $booking->start_date->translatedFormat('d M Y') }}
                                 -
                                 {{ $booking->end_date->translatedFormat('d M Y') }}
@@ -193,14 +214,13 @@
                             <strong class="text-bali-navy">
                                 Rp{{ number_format($booking->total_price, 0, ',', '.') }}
                             </strong>
-                            <a href="{{ route('bookings.show', $booking) }}"
-                               class="rounded-full bg-slate-100 px-5 py-2 text-center text-sm font-black text-bali-navy transition hover:bg-slate-200">
+                            <a href="{{ route('bookings.show', $booking) }}" class="btn-light px-5 py-2.5">
                                 Detail
                             </a>
                         </div>
                     </div>
                 @empty
-                    <div class="p-8 text-center text-bali-muted">
+                    <div class="p-10 text-center text-bali-muted">
                         Belum ada riwayat booking.
                     </div>
                 @endforelse

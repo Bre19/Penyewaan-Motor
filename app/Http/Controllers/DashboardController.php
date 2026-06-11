@@ -11,13 +11,13 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $activeBooking = Booking::with('motorcycle')
+        $activeBooking = Booking::with(['motorcycle', 'latestPayment'])
             ->where('user_id', $user->id)
             ->whereNotIn('status', Booking::finalStatuses())
             ->latest()
             ->first();
 
-        $latestBookings = Booking::with('motorcycle')
+        $latestBookings = Booking::with(['motorcycle', 'latestPayment'])
             ->where('user_id', $user->id)
             ->latest()
             ->take(5)
