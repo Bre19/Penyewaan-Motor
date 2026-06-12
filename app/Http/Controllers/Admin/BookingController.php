@@ -160,12 +160,44 @@ class BookingController extends Controller
             ->with('success', 'Booking berhasil ditolak.');
     }
 
+    public function markReadyToDeliver(Request $request, Booking $booking)
+    {
+        if (! $booking->canBePreparedForDeliveryByAdmin()) {
+            return redirect()
+                ->route('admin.bookings.show', $booking)
+                ->with('error', 'Booking hanya dapat ditandai siap diantar setelah pembayaran dikonfirmasi.');
+        }
+
+        $validated = $request->validate([
+            'delivery_preparation_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $oldStatus = $booking->status;
+
+        $booking->update([
+            'status' => Booking::STATUS_READY_TO_DELIVER,
+            'ready_to_deliver_at' => now(),
+            'delivery_preparation_note' => $validated['delivery_preparation_note'] ?? null,
+        ]);
+
+        $booking->recordStatusHistory(
+            $oldStatus,
+            Booking::STATUS_READY_TO_DELIVER,
+            $request->user()->id,
+            $validated['delivery_preparation_note'] ?: 'Motor sudah disiapkan dan siap diantar kepada penyewa.'
+        );
+
+        return redirect()
+            ->route('admin.bookings.show', $booking)
+            ->with('success', 'Booking berhasil ditandai siap diantar.');
+    }
+
     public function handover(Booking $booking)
     {
         if (! $booking->canBeHandedOverByAdmin()) {
             return redirect()
                 ->route('admin.bookings.show', $booking)
-                ->with('error', 'Checklist serah-terima hanya dapat dilakukan setelah pembayaran dikonfirmasi.');
+                ->with('error', 'Checklist serah-terima hanya dapat dilakukan setelah motor ditandai siap diantar.');
         }
 
         $booking->load(['user', 'motorcycle']);
@@ -178,7 +210,7 @@ class BookingController extends Controller
         if (! $booking->canBeHandedOverByAdmin()) {
             return redirect()
                 ->route('admin.bookings.show', $booking)
-                ->with('error', 'Checklist serah-terima hanya dapat dilakukan setelah pembayaran dikonfirmasi.');
+                ->with('error', 'Checklist serah-terima hanya dapat dilakukan setelah motor ditandai siap diantar.');
         }
 
         $validated = $request->validate([

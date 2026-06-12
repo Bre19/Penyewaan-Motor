@@ -45,6 +45,8 @@ class Booking extends Model
         'rejected_at',
         'rejection_reason',
         'cancelled_at',
+        'ready_to_deliver_at',
+        'delivery_preparation_note',
     ];
 
     protected function casts(): array
@@ -58,6 +60,7 @@ class Booking extends Model
             'approved_at' => 'datetime',
             'rejected_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'ready_to_deliver_at' => 'datetime',
         ];
     }
 
@@ -138,9 +141,14 @@ class Booking extends Model
         ], true);
     }
 
-    public function canBeHandedOverByAdmin(): bool
+    public function canBePreparedForDeliveryByAdmin(): bool
     {
         return $this->status === self::STATUS_PAYMENT_CONFIRMED;
+    }
+
+    public function canBeHandedOverByAdmin(): bool
+    {
+        return $this->status === self::STATUS_READY_TO_DELIVER;
     }
 
     public function canBeCompletedByAdmin(): bool

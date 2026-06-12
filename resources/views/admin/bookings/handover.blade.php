@@ -8,7 +8,7 @@
         <span class="badge-orange">Serah Terima Motor</span>
 
         <h2 class="mt-4 text-3xl font-black text-bali-navy">
-            Checklist sebelum motor diserahkan
+            Checklist serah-terima motor
         </h2>
 
         <p class="mt-3 max-w-3xl leading-8 text-bali-muted">

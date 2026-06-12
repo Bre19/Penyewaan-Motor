@@ -40,6 +40,29 @@
                 <strong class="mt-2 block text-3xl font-black text-bali-navy">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</strong>
                 <p class="mt-2 text-sm text-bali-muted">Rp{{ number_format($booking->price_per_day, 0, ',', '.') }} × {{ $booking->duration_days }} hari</p>
             </div>
+
+            @if ($booking->ready_to_deliver_at || $booking->delivery_preparation_note)
+                <div class="mt-5 rounded-[1.5rem] border border-cyan-200 bg-cyan-50 p-6">
+                    <span class="block text-sm font-black uppercase tracking-[0.16em] text-cyan-700">
+                        Persiapan Pengantaran
+                    </span>
+
+                    <strong class="mt-2 block text-xl font-black text-bali-navy">
+                        Motor Siap Diantar
+                    </strong>
+
+                    <p class="mt-2 text-sm leading-7 text-bali-muted">
+                        Ditandai siap pada
+                        {{ $booking->ready_to_deliver_at?->translatedFormat('d F Y H:i') ?? '-' }}.
+                    </p>
+
+                    @if ($booking->delivery_preparation_note)
+                        <p class="mt-4 rounded-2xl bg-white p-4 text-sm leading-7 text-bali-muted">
+                            {{ $booking->delivery_preparation_note }}
+                        </p>
+                    @endif
+                </div>
+            @endif
         </div>
 
         <div class="rounded-[2rem] border {{ $riskClass }} p-6 shadow-xl">
@@ -170,14 +193,83 @@
         <p class="mt-2 text-sm leading-7 text-bali-muted">Verifikasi pengajuan, lakukan serah-terima motor, dan selesaikan rental sesuai status booking.</p>
 
         @if ($booking->status === Booking::STATUS_PENDING_APPROVAL)
-            <form method="POST" action="{{ route('admin.bookings.approve', $booking) }}" class="mt-6">@csrf @method('PATCH')<button type="submit" class="w-full rounded-full bg-bali-teal px-6 py-4 text-sm font-black text-white transition hover:bg-bali-teal-dark">Setujui Booking</button></form>
-            <form method="POST" action="{{ route('admin.bookings.reject', $booking) }}" class="mt-5">@csrf @method('PATCH')<textarea name="rejection_reason" rows="5" required placeholder="Alasan penolakan" class="w-full rounded-2xl border border-bali-line px-4 py-3 text-sm outline-none"></textarea><button type="submit" class="mt-4 w-full rounded-full bg-red-50 px-6 py-4 text-sm font-black text-red-700 transition hover:bg-red-100">Tolak Booking</button></form>
+            <form method="POST" action="{{ route('admin.bookings.approve', $booking) }}" class="mt-6">
+                @csrf
+                @method('PATCH')
+
+                <button
+                    type="submit"
+                    class="w-full rounded-full bg-bali-teal px-6 py-4 text-sm font-black text-white transition hover:bg-bali-teal-dark"
+                >
+                    Setujui Booking
+                </button>
+            </form>
+
+            <form method="POST" action="{{ route('admin.bookings.reject', $booking) }}" class="mt-5">
+                @csrf
+                @method('PATCH')
+
+                <textarea
+                    name="rejection_reason"
+                    rows="5"
+                    required
+                    placeholder="Alasan penolakan"
+                    class="w-full rounded-2xl border border-bali-line px-4 py-3 text-sm outline-none"
+                ></textarea>
+
+                <button
+                    type="submit"
+                    class="mt-4 w-full rounded-full bg-red-50 px-6 py-4 text-sm font-black text-red-700 transition hover:bg-red-100"
+                >
+                    Tolak Booking
+                </button>
+            </form>
         @elseif ($booking->status === Booking::STATUS_PAYMENT_CONFIRMED)
-            <a href="{{ route('admin.bookings.handover', $booking) }}" class="mt-6 block rounded-full bg-bali-teal px-6 py-4 text-center text-sm font-black text-white transition hover:bg-bali-teal-dark">Isi Checklist Serah Terima</a>
+            <form method="POST" action="{{ route('admin.bookings.markReadyToDeliver', $booking) }}" class="mt-6">
+                @csrf
+                @method('PATCH')
+
+                <label for="delivery_preparation_note" class="mb-2 block text-sm font-black text-bali-navy">
+                    Catatan Persiapan Motor
+                </label>
+
+                <textarea
+                    id="delivery_preparation_note"
+                    name="delivery_preparation_note"
+                    rows="5"
+                    placeholder="Contoh: motor sudah dicuci, bensin penuh, helm 2 unit, jas hujan 1 unit"
+                    class="w-full rounded-2xl border border-bali-line px-4 py-3 text-sm outline-none transition focus:border-bali-teal focus:ring-2 focus:ring-bali-teal/20"
+                >{{ old('delivery_preparation_note') }}</textarea>
+
+                @error('delivery_preparation_note')
+                    <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
+                @enderror
+
+                <button
+                    type="submit"
+                    class="mt-4 w-full rounded-full bg-cyan-600 px-6 py-4 text-sm font-black text-white transition hover:bg-cyan-700"
+                >
+                    Tandai Siap Diantar
+                </button>
+            </form>
+        @elseif ($booking->status === Booking::STATUS_READY_TO_DELIVER)
+            <a
+                href="{{ route('admin.bookings.handover', $booking) }}"
+                class="mt-6 block rounded-full bg-bali-teal px-6 py-4 text-center text-sm font-black text-white transition hover:bg-bali-teal-dark"
+            >
+                Isi Checklist Serah Terima
+            </a>
         @elseif ($booking->status === Booking::STATUS_ONGOING)
-            <a href="{{ route('admin.bookings.complete', $booking) }}" class="mt-6 block rounded-full bg-bali-orange px-6 py-4 text-center text-sm font-black text-white transition hover:bg-bali-orange-dark">Selesaikan Rental</a>
+            <a
+                href="{{ route('admin.bookings.complete', $booking) }}"
+                class="mt-6 block rounded-full bg-bali-orange px-6 py-4 text-center text-sm font-black text-white transition hover:bg-bali-orange-dark"
+            >
+                Selesaikan Rental
+            </a>
         @else
-            <div class="mt-6 rounded-2xl bg-slate-100 p-5 text-sm leading-7 text-bali-muted">Tidak ada aksi admin lanjutan untuk status saat ini.</div>
+            <div class="mt-6 rounded-2xl bg-slate-100 p-5 text-sm leading-7 text-bali-muted">
+                Tidak ada aksi admin lanjutan untuk status saat ini.
+            </div>
         @endif
 
         <div class="mt-6 rounded-2xl bg-slate-100 p-5 text-sm leading-7 text-bali-muted"><strong class="block text-bali-navy">Terms Accepted</strong><span>{{ $booking->terms_accepted_at ? $booking->terms_accepted_at->translatedFormat('d F Y H:i') : 'Belum tercatat' }}</span></div>

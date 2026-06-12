@@ -59,6 +59,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])
             ->name('bookings.reject');
+        
+        Route::patch('/bookings/{booking}/ready-to-deliver', [AdminBookingController::class, 'markReadyToDeliver'])
+            ->name('bookings.markReadyToDeliver');
 
         Route::get('/bookings/{booking}/handover', [AdminBookingController::class, 'handover'])
             ->name('bookings.handover');
