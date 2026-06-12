@@ -18,10 +18,14 @@ class Payment extends Model
     public const METHOD_BANK_TRANSFER = 'bank_transfer';
     public const METHOD_E_WALLET = 'e_wallet';
 
+    public const TYPE_RENTAL_FEE = 'rental_fee';
+    public const TYPE_ADDITIONAL_CHARGE = 'additional_charge';
+
     protected $fillable = [
         'booking_id',
         'user_id',
         'payment_code',
+        'payment_type',
         'amount',
         'method',
         'payer_name',
@@ -55,6 +59,10 @@ class Payment extends Model
                 $payment->payment_code = $code;
             }
 
+            if (! $payment->payment_type) {
+                $payment->payment_type = self::TYPE_RENTAL_FEE;
+            }
+
             if (! $payment->status) {
                 $payment->status = self::STATUS_WAITING_VERIFICATION;
             }
@@ -78,6 +86,14 @@ class Payment extends Model
         ];
     }
 
+    public static function typeLabels(): array
+    {
+        return [
+            self::TYPE_RENTAL_FEE => 'Pembayaran Sewa',
+            self::TYPE_ADDITIONAL_CHARGE => 'Biaya Tambahan',
+        ];
+    }
+
     public function statusLabel(): string
     {
         return self::statusLabels()[$this->status] ?? 'Tidak Diketahui';
@@ -86,6 +102,21 @@ class Payment extends Model
     public function methodLabel(): string
     {
         return self::methodLabels()[$this->method] ?? 'Tidak Diketahui';
+    }
+
+    public function typeLabel(): string
+    {
+        return self::typeLabels()[$this->payment_type] ?? 'Pembayaran';
+    }
+
+    public function isRentalFee(): bool
+    {
+        return $this->payment_type === self::TYPE_RENTAL_FEE;
+    }
+
+    public function isAdditionalCharge(): bool
+    {
+        return $this->payment_type === self::TYPE_ADDITIONAL_CHARGE;
     }
 
     public function booking(): BelongsTo

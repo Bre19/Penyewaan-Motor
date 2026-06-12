@@ -6,13 +6,13 @@
 
     <div class="container-page relative">
         <span class="badge-teal bg-white/10 text-teal-200">
-            Pembayaran
+            {{ $paymentTypeLabel }}
         </span>
         <h1 class="mt-5 max-w-4xl text-5xl font-black leading-tight tracking-[-0.05em] md:text-6xl">
-            Upload bukti pembayaran.
+            {{ $paymentTitle }}
         </h1>
         <p class="mt-5 max-w-2xl leading-8 text-slate-300">
-            Kirim bukti pembayaran agar admin dapat melakukan verifikasi.
+            {{ $paymentDescription }}
         </p>
     </div>
 </section>
@@ -37,9 +37,18 @@
             <div class="mt-6 rounded-[1.7rem] bg-bali-navy p-6 text-white">
                 <span class="block text-sm font-bold text-slate-300">Total Pembayaran</span>
                 <strong class="mt-2 block text-4xl font-black">
-                    Rp{{ number_format($booking->total_price, 0, ',', '.') }}
+                    Rp{{ number_format($paymentAmount, 0, ',', '.') }}
                 </strong>
             </div>
+
+            @if ($paymentType === \App\Models\Payment::TYPE_ADDITIONAL_CHARGE)
+                <div class="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
+                    <strong class="block text-bali-navy">Alasan Biaya Tambahan</strong>
+                    <p class="mt-2 text-sm leading-7 text-bali-muted">
+                        {{ $booking->additional_charge_reason ?: 'Biaya tambahan dari hasil evaluasi pengembalian motor.' }}
+                    </p>
+                </div>
+            @endif
 
             <div class="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5">
                 <strong class="block text-bali-navy">Instruksi</strong>

@@ -54,6 +54,11 @@
             </div>
 
             <div class="rounded-2xl border border-bali-line p-5">
+                <span class="block text-sm text-bali-muted">Jenis Pembayaran</span>
+                <strong class="mt-1 block text-bali-navy">{{ $payment->typeLabel() }}</strong>
+            </div>
+
+            <div class="rounded-2xl border border-bali-line p-5">
                 <span class="block text-sm text-bali-muted">Tanggal Upload</span>
                 <strong class="mt-1 block text-bali-navy">
                     {{ $payment->uploaded_at?->translatedFormat('d F Y H:i') ?? '-' }}

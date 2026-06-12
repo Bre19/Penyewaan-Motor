@@ -25,6 +25,11 @@ class Booking extends Model
     public const STATUS_CANCELLED = 'cancelled';
 
     public const TERMS_VERSION = 'v1.0';
+    public const ADDITIONAL_CHARGE_NONE = 'none';
+    public const ADDITIONAL_CHARGE_PENDING_PAYMENT = 'pending_payment';
+    public const ADDITIONAL_CHARGE_WAITING_VERIFICATION = 'waiting_verification';
+    public const ADDITIONAL_CHARGE_CONFIRMED = 'confirmed';
+    public const ADDITIONAL_CHARGE_WAIVED = 'waived';
 
     protected $fillable = [
         'user_id',
@@ -47,6 +52,11 @@ class Booking extends Model
         'cancelled_at',
         'ready_to_deliver_at',
         'delivery_preparation_note',
+        'additional_charge_amount',
+        'additional_charge_reason',
+        'additional_charge_status',
+        'additional_charge_requested_at',
+        'additional_charge_confirmed_at',
     ];
 
     protected function casts(): array
@@ -61,6 +71,9 @@ class Booking extends Model
             'rejected_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'ready_to_deliver_at' => 'datetime',
+            'additional_charge_amount' => 'decimal:2',
+            'additional_charge_requested_at' => 'datetime',
+            'additional_charge_confirmed_at' => 'datetime',
         ];
     }
 
@@ -135,10 +148,23 @@ class Booking extends Model
 
     public function canUploadPaymentProof(): bool
     {
+        return $this->canUploadRentalPaymentProof()
+            || $this->canUploadAdditionalChargePaymentProof();
+    }
+
+    public function canUploadRentalPaymentProof(): bool
+    {
         return in_array($this->status, [
             self::STATUS_APPROVED,
             self::STATUS_WAITING_PAYMENT,
         ], true);
+    }
+
+    public function canUploadAdditionalChargePaymentProof(): bool
+    {
+        return $this->status === self::STATUS_ONGOING
+            && $this->additional_charge_status === self::ADDITIONAL_CHARGE_PENDING_PAYMENT
+            && (float) $this->additional_charge_amount > 0;
     }
 
     public function canBePreparedForDeliveryByAdmin(): bool
@@ -151,9 +177,34 @@ class Booking extends Model
         return $this->status === self::STATUS_READY_TO_DELIVER;
     }
 
+    public static function additionalChargeStatusLabels(): array
+    {
+        return [
+            self::ADDITIONAL_CHARGE_NONE => 'Tidak Ada',
+            self::ADDITIONAL_CHARGE_PENDING_PAYMENT => 'Menunggu Pembayaran',
+            self::ADDITIONAL_CHARGE_WAITING_VERIFICATION => 'Menunggu Verifikasi',
+            self::ADDITIONAL_CHARGE_CONFIRMED => 'Dikonfirmasi',
+            self::ADDITIONAL_CHARGE_WAIVED => 'Tidak Dikenakan',
+        ];
+    }
+
+    public function additionalChargeStatusLabel(): string
+    {
+        return self::additionalChargeStatusLabels()[$this->additional_charge_status] ?? 'Tidak Diketahui';
+    }
+
+    public function hasAdditionalCharge(): bool
+    {
+        return (float) $this->additional_charge_amount > 0;
+    }
+
     public function canBeCompletedByAdmin(): bool
     {
-        return $this->status === self::STATUS_ONGOING;
+        return $this->status === self::STATUS_ONGOING
+            && ! in_array($this->additional_charge_status, [
+                self::ADDITIONAL_CHARGE_PENDING_PAYMENT,
+                self::ADDITIONAL_CHARGE_WAITING_VERIFICATION,
+            ], true);
     }
 
     public function hasAcceptedTerms(): bool
@@ -189,6 +240,20 @@ class Booking extends Model
     public function latestPayment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    public function latestRentalPayment(): HasOne
+    {
+        return $this->hasOne(Payment::class)
+            ->where('payment_type', Payment::TYPE_RENTAL_FEE)
+            ->latestOfMany();
+    }
+
+    public function latestAdditionalChargePayment(): HasOne
+    {
+        return $this->hasOne(Payment::class)
+            ->where('payment_type', Payment::TYPE_ADDITIONAL_CHARGE)
+            ->latestOfMany();
     }
 
     public function rentalChecklist(): HasOne

@@ -172,6 +172,39 @@
             </div>
         @endif
 
+        @if ($booking->hasAdditionalCharge())
+            <div class="rounded-[2rem] border border-orange-200 bg-orange-50 p-8 shadow-xl">
+                <h3 class="text-xl font-black text-bali-navy">Biaya Tambahan</h3>
+
+                <div class="mt-5 grid gap-4 md:grid-cols-3">
+                    <div class="rounded-2xl bg-white p-4">
+                        <span class="block text-sm text-bali-muted">Nominal</span>
+                        <strong class="mt-1 block text-2xl font-black text-bali-navy">
+                            Rp{{ number_format($booking->additional_charge_amount, 0, ',', '.') }}
+                        </strong>
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-4">
+                        <span class="block text-sm text-bali-muted">Status</span>
+                        <strong class="mt-1 block text-bali-navy">
+                            {{ $booking->additionalChargeStatusLabel() }}
+                        </strong>
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-4">
+                        <span class="block text-sm text-bali-muted">Dibuat Pada</span>
+                        <strong class="mt-1 block text-bali-navy">
+                            {{ $booking->additional_charge_requested_at?->translatedFormat('d M Y H:i') ?? '-' }}
+                        </strong>
+                    </div>
+                </div>
+
+                <p class="mt-5 rounded-2xl bg-white p-5 text-sm leading-7 text-bali-muted">
+                    {{ $booking->additional_charge_reason ?: 'Tidak ada catatan biaya tambahan.' }}
+                </p>
+            </div>
+        @endif
+
         <div class="rounded-[2rem] border border-bali-line bg-white p-8 shadow-xl">
             <h3 class="text-xl font-black text-bali-navy">Timeline Status Booking</h3>
             <div class="mt-5 grid gap-3">

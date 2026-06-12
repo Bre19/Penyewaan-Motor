@@ -70,7 +70,8 @@ class PaymentController extends Controller
         }
 
         DB::transaction(function () use ($payment) {
-            $oldStatus = $payment->booking->status;
+            $booking = $payment->booking;
+            $oldStatus = $booking->status;
 
             $payment->update([
                 'status' => Payment::STATUS_CONFIRMED,
@@ -79,11 +80,35 @@ class PaymentController extends Controller
                 'rejection_reason' => null,
             ]);
 
-            $payment->booking->update([
-                'status' => Booking::STATUS_PAYMENT_CONFIRMED,
-            ]);
+            if ($payment->isRentalFee()) {
+                $booking->update([
+                    'status' => Booking::STATUS_PAYMENT_CONFIRMED,
+                ]);
 
-            $payment->booking->recordStatusHistory($oldStatus, Booking::STATUS_PAYMENT_CONFIRMED, auth()->id(), 'Pembayaran dikonfirmasi oleh admin.');
+                $booking->recordStatusHistory(
+                    $oldStatus,
+                    Booking::STATUS_PAYMENT_CONFIRMED,
+                    auth()->id(),
+                    'Pembayaran sewa dikonfirmasi oleh admin.'
+                );
+
+                return;
+            }
+
+            if ($payment->isAdditionalCharge()) {
+                $booking->update([
+                    'status' => Booking::STATUS_COMPLETED,
+                    'additional_charge_status' => Booking::ADDITIONAL_CHARGE_CONFIRMED,
+                    'additional_charge_confirmed_at' => now(),
+                ]);
+
+                $booking->recordStatusHistory(
+                    $oldStatus,
+                    Booking::STATUS_COMPLETED,
+                    auth()->id(),
+                    'Biaya tambahan dikonfirmasi oleh admin. Rental dinyatakan selesai.'
+                );
+            }
         });
 
         return redirect()
@@ -102,7 +127,8 @@ class PaymentController extends Controller
         ]);
 
         DB::transaction(function () use ($payment, $validated) {
-            $oldStatus = $payment->booking->status;
+            $booking = $payment->booking;
+            $oldStatus = $booking->status;
 
             $payment->update([
                 'status' => Payment::STATUS_REJECTED,
@@ -110,15 +136,37 @@ class PaymentController extends Controller
                 'rejection_reason' => $validated['rejection_reason'],
             ]);
 
-            $payment->booking->update([
-                'status' => Booking::STATUS_WAITING_PAYMENT,
-            ]);
+            if ($payment->isRentalFee()) {
+                $booking->update([
+                    'status' => Booking::STATUS_WAITING_PAYMENT,
+                ]);
 
-            $payment->booking->recordStatusHistory($oldStatus, Booking::STATUS_WAITING_PAYMENT, auth()->id(), $validated['rejection_reason']);
+                $booking->recordStatusHistory(
+                    $oldStatus,
+                    Booking::STATUS_WAITING_PAYMENT,
+                    auth()->id(),
+                    $validated['rejection_reason']
+                );
+
+                return;
+            }
+
+            if ($payment->isAdditionalCharge()) {
+                $booking->update([
+                    'additional_charge_status' => Booking::ADDITIONAL_CHARGE_PENDING_PAYMENT,
+                ]);
+
+                $booking->recordStatusHistory(
+                    $oldStatus,
+                    $oldStatus,
+                    auth()->id(),
+                    'Pembayaran biaya tambahan ditolak: ' . $validated['rejection_reason']
+                );
+            }
         });
 
         return redirect()
             ->route('admin.payments.show', $payment)
-            ->with('success', 'Pembayaran berhasil ditolak. Booking dikembalikan ke status menunggu pembayaran.');
+            ->with('success', 'Pembayaran berhasil ditolak.');
     }
 }

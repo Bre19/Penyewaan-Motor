@@ -71,7 +71,15 @@ class BookingController extends Controller
     {
         abort_unless($booking->user_id === $request->user()->id, 403);
 
-        $booking->load(['motorcycle', 'latestPayment', 'rentalChecklist', 'rentalSafetyScore', 'statusHistories.changedBy']);
+        $booking->load([
+            'motorcycle',
+            'latestPayment',
+            'latestRentalPayment',
+            'latestAdditionalChargePayment',
+            'rentalChecklist',
+            'rentalSafetyScore',
+            'statusHistories.changedBy',
+        ]);
 
         return view('bookings.show', compact('booking'));
     }

@@ -55,6 +55,7 @@
             <thead class="bg-slate-100 text-xs uppercase tracking-wide text-bali-muted">
                 <tr>
                     <th class="px-6 py-4">Kode</th>
+                    <th class="px-6 py-4">Jenis</th>
                     <th class="px-6 py-4">Booking</th>
                     <th class="px-6 py-4">Penyewa</th>
                     <th class="px-6 py-4">Metode</th>

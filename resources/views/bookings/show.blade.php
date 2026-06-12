@@ -2,7 +2,8 @@
 
 @section('content')
 @php
-    $latestPayment = $booking->latestPayment;
+    $rentalPayment = $booking->latestRentalPayment;
+    $additionalChargePayment = $booking->latestAdditionalChargePayment;
 
     $badgeClass = match ($booking->status) {
         \App\Models\Booking::STATUS_PENDING_APPROVAL => 'bg-amber-50 text-amber-700 border-amber-200',
@@ -20,6 +21,11 @@
 @endphp
 
 <section class="relative overflow-hidden bg-bali-navy py-20 text-white">
+    @if ($booking->canUploadPaymentProof())
+        <a href="{{ route('payments.create', $booking) }}" class="btn-primary">
+            Upload Bukti
+        </a>
+    @endif
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(13,148,136,0.34),transparent_30rem),radial-gradient(circle_at_85%_5%,rgba(249,115,22,0.28),transparent_26rem)]"></div>
 
     <div class="container-page relative">
@@ -45,6 +51,11 @@
 </section>
 
 <section class="py-16">
+    @if ($booking->canUploadPaymentProof())
+        <a href="{{ route('payments.create', $booking) }}" class="btn-primary">
+            Upload Bukti
+        </a>
+    @endif
     <div class="container-page grid gap-8 lg:grid-cols-[1fr_0.75fr]">
         <div class="space-y-8">
             @if (session('success'))
@@ -125,28 +136,28 @@
                     @endif
                 </div>
 
-                @if ($latestPayment)
+                @if ($rentalPayment)
                     <div class="mt-6 grid gap-4 md:grid-cols-3">
                         <div class="rounded-2xl bg-slate-100 p-4">
                             <span class="block text-sm text-bali-muted">Kode</span>
-                            <strong class="mt-1 block text-bali-navy">{{ $latestPayment->payment_code }}</strong>
+                            <strong class="mt-1 block text-bali-navy">{{ $rentalPayment->payment_code }}</strong>
                         </div>
 
                         <div class="rounded-2xl bg-slate-100 p-4">
                             <span class="block text-sm text-bali-muted">Metode</span>
-                            <strong class="mt-1 block text-bali-navy">{{ $latestPayment->methodLabel() }}</strong>
+                            <strong class="mt-1 block text-bali-navy">{{ $rentalPayment->methodLabel() }}</strong>
                         </div>
 
                         <div class="rounded-2xl bg-slate-100 p-4">
                             <span class="block text-sm text-bali-muted">Status</span>
-                            <strong class="mt-1 block text-bali-navy">{{ $latestPayment->statusLabel() }}</strong>
+                            <strong class="mt-1 block text-bali-navy">{{ $rentalPayment->statusLabel() }}</strong>
                         </div>
                     </div>
 
-                    @if ($latestPayment->rejection_reason)
+                    @if ($rentalPayment->rejection_reason)
                         <div class="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
                             <strong class="block text-red-700">Alasan Penolakan Pembayaran</strong>
-                            <p class="mt-2 text-sm leading-7 text-red-700">{{ $latestPayment->rejection_reason }}</p>
+                            <p class="mt-2 text-sm leading-7 text-red-700">{{ $rentalPayment->rejection_reason }}</p>
                         </div>
                     @endif
                 @else

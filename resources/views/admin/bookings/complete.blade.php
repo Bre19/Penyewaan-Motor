@@ -8,11 +8,12 @@
         <span class="badge-teal">Safety Evaluation</span>
 
         <h2 class="mt-4 text-3xl font-black text-bali-navy">
-            Evaluasi keamanan penyewa
+            Evaluasi pengembalian motor
         </h2>
 
         <p class="mt-3 max-w-3xl leading-8 text-bali-muted">
-            Isi evaluasi setelah motor dikembalikan. Sistem akan menghitung Safety Score dan menentukan apakah penyewa mendapat badge Trusted Rider.
+            Isi evaluasi setelah motor dikembalikan. Jika ada kerusakan, keterlambatan,
+            atau biaya lain, masukkan biaya tambahan agar penyewa melakukan pembayaran sebelum transaksi selesai.
         </p>
 
         @if ($errors->any())
@@ -35,9 +36,7 @@
                         checked
                         class="mt-1 h-4 w-4 rounded border-bali-line text-bali-teal focus:ring-bali-teal"
                     >
-                    <span>
-                        Tidak ada laporan pelanggaran selama masa sewa.
-                    </span>
+                    <span>Tidak ada laporan pelanggaran selama masa sewa.</span>
                 </label>
 
                 <label class="flex items-start gap-3 rounded-2xl border border-bali-line bg-slate-50 p-5 text-sm font-bold text-bali-navy">
@@ -47,9 +46,7 @@
                         value="1"
                         class="mt-1 h-4 w-4 rounded border-bali-line text-bali-teal focus:ring-bali-teal"
                     >
-                    <span>
-                        Terdapat kerusakan akibat kelalaian penyewa.
-                    </span>
+                    <span>Terdapat kerusakan akibat kelalaian penyewa.</span>
                 </label>
 
                 <label class="flex items-start gap-3 rounded-2xl border border-bali-line bg-slate-50 p-5 text-sm font-bold text-bali-navy">
@@ -59,9 +56,7 @@
                         value="1"
                         class="mt-1 h-4 w-4 rounded border-bali-line text-bali-teal focus:ring-bali-teal"
                     >
-                    <span>
-                        Penyewa dilaporkan berkendara ugal-ugalan.
-                    </span>
+                    <span>Penyewa dilaporkan berkendara ugal-ugalan.</span>
                 </label>
             </div>
 
@@ -74,6 +69,49 @@
                     <li>Dilaporkan ugal-ugalan: -40</li>
                     <li>Badge Trusted Rider diberikan jika score minimal 80</li>
                 </ul>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-orange-200 bg-orange-50 p-5">
+                <h3 class="text-xl font-black text-bali-navy">Biaya Tambahan</h3>
+                <p class="mt-2 text-sm leading-7 text-bali-muted">
+                    Isi hanya jika terdapat kerusakan, keterlambatan, kehilangan perlengkapan,
+                    atau biaya lain yang harus dibayar penyewa.
+                </p>
+
+                <div class="mt-5">
+                    <label for="additional_charge_amount" class="mb-2 block text-sm font-black text-bali-navy">
+                        Nominal Biaya Tambahan
+                    </label>
+                    <input
+                        id="additional_charge_amount"
+                        type="number"
+                        min="0"
+                        step="1000"
+                        name="additional_charge_amount"
+                        value="{{ old('additional_charge_amount', 0) }}"
+                        class="input-ui"
+                        placeholder="Contoh: 150000"
+                    >
+                    @error('additional_charge_amount')
+                        <p class="mt-2 text-sm font-bold text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mt-5">
+                    <label for="additional_charge_reason" class="mb-2 block text-sm font-black text-bali-navy">
+                        Alasan Biaya Tambahan
+                    </label>
+                    <textarea
+                        id="additional_charge_reason"
+                        name="additional_charge_reason"
+                        rows="4"
+                        class="textarea-ui"
+                        placeholder="Contoh: terlambat 1 hari, spion kiri rusak, helm hilang"
+                    >{{ old('additional_charge_reason') }}</textarea>
+                    @error('additional_charge_reason')
+                        <p class="mt-2 text-sm font-bold text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <div>
@@ -95,7 +133,7 @@
 
             <div class="flex flex-col gap-3 border-t border-bali-line pt-6 sm:flex-row">
                 <button type="submit" class="btn-primary">
-                    Hitung Safety Score dan Selesaikan Rental
+                    Simpan Evaluasi Pengembalian
                 </button>
 
                 <a href="{{ route('admin.bookings.show', $booking) }}" class="btn-light">

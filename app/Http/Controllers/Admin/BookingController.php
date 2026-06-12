@@ -292,12 +292,22 @@ class BookingController extends Controller
             'no_violation_report' => ['nullable', 'boolean'],
             'negligent_damage' => ['nullable', 'boolean'],
             'reckless_report' => ['nullable', 'boolean'],
+            'additional_charge_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
+            'additional_charge_reason' => [
+                'nullable',
+                'string',
+                'max:2000',
+                Rule::requiredIf(fn () => (float) $request->input('additional_charge_amount', 0) > 0),
+            ],
             'notes' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'additional_charge_reason.required' => 'Alasan biaya tambahan wajib diisi jika nominal biaya tambahan lebih dari 0.',
         ]);
 
         $negligentDamage = $request->boolean('negligent_damage');
         $recklessReport = $request->boolean('reckless_report');
         $noViolationReport = $request->boolean('no_violation_report');
+        $additionalChargeAmount = (float) ($validated['additional_charge_amount'] ?? 0);
 
         if ($negligentDamage || $recklessReport) {
             $noViolationReport = false;
@@ -306,7 +316,17 @@ class BookingController extends Controller
         $score = RentalSafetyScore::calculateScore($noViolationReport, $negligentDamage, $recklessReport);
         $badgeAwarded = RentalSafetyScore::isTrustedRiderScore($score);
 
-        DB::transaction(function () use ($request, $booking, $validated, $noViolationReport, $negligentDamage, $recklessReport, $score, $badgeAwarded) {
+        DB::transaction(function () use (
+            $request,
+            $booking,
+            $validated,
+            $noViolationReport,
+            $negligentDamage,
+            $recklessReport,
+            $score,
+            $badgeAwarded,
+            $additionalChargeAmount
+        ) {
             $oldStatus = $booking->status;
 
             RentalSafetyScore::create([
@@ -321,11 +341,37 @@ class BookingController extends Controller
                 'evaluated_at' => now(),
             ]);
 
-            $booking->update([
-                'status' => Booking::STATUS_COMPLETED,
-            ]);
+            if ($additionalChargeAmount > 0) {
+                $booking->update([
+                    'additional_charge_amount' => $additionalChargeAmount,
+                    'additional_charge_reason' => $validated['additional_charge_reason'],
+                    'additional_charge_status' => Booking::ADDITIONAL_CHARGE_PENDING_PAYMENT,
+                    'additional_charge_requested_at' => now(),
+                ]);
 
-            $booking->recordStatusHistory($oldStatus, Booking::STATUS_COMPLETED, $request->user()->id, 'Rental diselesaikan dan safety score dihitung.');
+                $booking->recordStatusHistory(
+                    $oldStatus,
+                    Booking::STATUS_ONGOING,
+                    $request->user()->id,
+                    'Rental dievaluasi. Penyewa perlu membayar biaya tambahan sebelum transaksi selesai.'
+                );
+            } else {
+                $booking->update([
+                    'status' => Booking::STATUS_COMPLETED,
+                    'additional_charge_amount' => 0,
+                    'additional_charge_reason' => null,
+                    'additional_charge_status' => Booking::ADDITIONAL_CHARGE_WAIVED,
+                    'additional_charge_requested_at' => null,
+                    'additional_charge_confirmed_at' => null,
+                ]);
+
+                $booking->recordStatusHistory(
+                    $oldStatus,
+                    Booking::STATUS_COMPLETED,
+                    $request->user()->id,
+                    'Rental diselesaikan tanpa biaya tambahan dan safety score dihitung.'
+                );
+            }
 
             if ($badgeAwarded && ! $booking->user->trusted_rider_at) {
                 $booking->user->forceFill([
@@ -336,6 +382,11 @@ class BookingController extends Controller
 
         return redirect()
             ->route('admin.bookings.show', $booking)
-            ->with('success', 'Rental berhasil diselesaikan dan Safety Score telah dihitung.');
+            ->with(
+                'success',
+                $additionalChargeAmount > 0
+                    ? 'Rental berhasil dievaluasi. Penyewa perlu membayar biaya tambahan.'
+                    : 'Rental berhasil diselesaikan dan Safety Score telah dihitung.'
+            );
     }
 }
