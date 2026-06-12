@@ -9,7 +9,7 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load('documents');
 
         $activeBooking = Booking::with(['motorcycle', 'latestPayment'])
             ->where('user_id', $user->id)
@@ -36,7 +36,8 @@ class DashboardController extends Controller
         $profileCompleted = filled($user->phone_number)
             && filled($user->current_address)
             && filled($user->passport_number)
-            && filled($user->origin_country);
+            && filled($user->origin_country)
+            && $user->hasRequiredRentalDocuments();
 
         return view('dashboard', compact(
             'user',

@@ -57,7 +57,7 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         $booking->load([
-            'user',
+            'user.documents',
             'motorcycle',
             'latestPayment',
             'rentalChecklist',

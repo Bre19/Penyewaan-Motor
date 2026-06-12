@@ -76,4 +76,28 @@ class User extends Authenticatable
     {
         return $this->trusted_rider_at !== null;
     }
+
+    public function documentByType(string $type): ?UserDocument
+    {
+        if ($this->relationLoaded('documents')) {
+            return $this->documents
+                ->where('type', $type)
+                ->sortByDesc('created_at')
+                ->first();
+        }
+
+        return $this->documents()
+            ->where('type', $type)
+            ->latest()
+            ->first();
+    }
+
+    public function hasRequiredRentalDocuments(): bool
+    {
+        $hasPassport = $this->documentByType(UserDocument::TYPE_PASSPORT) !== null;
+        $hasVisa = $this->documentByType(UserDocument::TYPE_VISA) !== null;
+        $hasSignature = $this->documentByType(UserDocument::TYPE_SIGNATURE) !== null;
+
+        return $hasPassport && $hasVisa && $hasSignature;
+    }
 }

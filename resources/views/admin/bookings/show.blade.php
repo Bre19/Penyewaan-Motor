@@ -55,13 +55,76 @@
 
         <div class="rounded-[2rem] border border-bali-line bg-white p-8 shadow-xl">
             <h3 class="text-xl font-black text-bali-navy">Data Penyewa</h3>
+
             <div class="mt-4 grid gap-3 text-sm md:grid-cols-2">
-                <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-bali-muted">Alamat Saat Ini</span><strong class="mt-1 block text-bali-navy">{{ $booking->user->current_address ?? '-' }}</strong></div>
-                <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-bali-muted">Nomor Paspor</span><strong class="mt-1 block text-bali-navy">{{ $booking->user->passport_number ?? '-' }}</strong></div>
-                <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-bali-muted">Negara Asal</span><strong class="mt-1 block text-bali-navy">{{ $booking->user->origin_country ?? '-' }}</strong></div>
-                <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-bali-muted">SIM</span><strong class="mt-1 block text-bali-navy">{{ $booking->user->has_license ? 'Ada' : 'Tidak Ada' }}</strong></div>
+                <div class="rounded-2xl bg-slate-100 p-4">
+                    <span class="block text-bali-muted">Alamat Saat Ini</span>
+                    <strong class="mt-1 block text-bali-navy">{{ $booking->user->current_address ?? '-' }}</strong>
+                </div>
+
+                <div class="rounded-2xl bg-slate-100 p-4">
+                    <span class="block text-bali-muted">Nomor Paspor</span>
+                    <strong class="mt-1 block text-bali-navy">{{ $booking->user->passport_number ?? '-' }}</strong>
+                </div>
+
+                <div class="rounded-2xl bg-slate-100 p-4">
+                    <span class="block text-bali-muted">Negara Asal</span>
+                    <strong class="mt-1 block text-bali-navy">{{ $booking->user->origin_country ?? '-' }}</strong>
+                </div>
+
+                <div class="rounded-2xl bg-slate-100 p-4">
+                    <span class="block text-bali-muted">SIM</span>
+                    <strong class="mt-1 block text-bali-navy">{{ $booking->user->has_license ? 'Ada' : 'Tidak Ada' }}</strong>
+                </div>
             </div>
-            <div class="mt-6"><h3 class="text-xl font-black text-bali-navy">Catatan Penyewa</h3><p class="mt-4 rounded-2xl border border-bali-line p-5 leading-8 text-bali-muted">{{ $booking->customer_note ?: 'Tidak ada catatan tambahan.' }}</p></div>
+
+            @php
+                $documents = $booking->user->documents->keyBy('type');
+                $documentItems = [
+                    \App\Models\UserDocument::TYPE_PASSPORT => 'Paspor',
+                    \App\Models\UserDocument::TYPE_VISA => 'Visa',
+                    \App\Models\UserDocument::TYPE_LICENSE => 'SIM',
+                    \App\Models\UserDocument::TYPE_SIGNATURE => 'Tanda Tangan Digital',
+                ];
+            @endphp
+
+            <div class="mt-6">
+                <h3 class="text-xl font-black text-bali-navy">Dokumen Penyewa</h3>
+
+                <div class="mt-4 grid gap-3 md:grid-cols-2">
+                    @foreach ($documentItems as $type => $label)
+                        @php
+                            $document = $documents->get($type);
+                        @endphp
+
+                        <div class="rounded-2xl border border-bali-line p-4">
+                            <span class="block text-sm font-bold text-bali-muted">{{ $label }}</span>
+
+                            @if ($document)
+                                <a
+                                    href="{{ asset('storage/' . $document->file_path) }}"
+                                    target="_blank"
+                                    class="mt-2 inline-flex rounded-full bg-bali-teal px-4 py-2 text-xs font-black text-white transition hover:bg-bali-teal-dark"
+                                >
+                                    Lihat Dokumen
+                                </a>
+                                <p class="mt-2 text-xs font-semibold text-bali-muted">
+                                    {{ $document->uploaded_at?->translatedFormat('d M Y H:i') ?? '-' }}
+                                </p>
+                            @else
+                                <strong class="mt-2 block text-sm text-red-600">Belum Ada</strong>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-xl font-black text-bali-navy">Catatan Penyewa</h3>
+                <p class="mt-4 rounded-2xl border border-bali-line p-5 leading-8 text-bali-muted">
+                    {{ $booking->customer_note ?: 'Tidak ada catatan tambahan.' }}
+                </p>
+            </div>
         </div>
 
         @if ($booking->rentalChecklist)
