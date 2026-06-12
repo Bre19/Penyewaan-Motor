@@ -75,6 +75,12 @@
                         </td>
 
                         <td class="px-6 py-5">
+                            <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-black text-bali-navy">
+                                {{ $payment->typeLabel() }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-5">
                             <strong class="text-bali-navy">{{ $payment->booking->booking_code }}</strong>
                             <span class="mt-1 block text-xs text-bali-muted">
                                 {{ $payment->booking->motorcycle->brand }} {{ $payment->booking->motorcycle->model }}
@@ -111,7 +117,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-10 text-center text-bali-muted">
+                        <td colspan="8" class="px-6 py-10 text-center text-bali-muted">
                             Pembayaran tidak ditemukan.
                         </td>
                     </tr>

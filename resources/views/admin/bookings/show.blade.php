@@ -292,12 +292,29 @@
             >
                 Isi Checklist Serah Terima
             </a>
-        @elseif ($booking->status === Booking::STATUS_ONGOING)
+        @elseif ($booking->status === Booking::STATUS_ONGOING && $booking->canBeCompletedByAdmin())
             <a
                 href="{{ route('admin.bookings.complete', $booking) }}"
                 class="mt-6 block rounded-full bg-bali-orange px-6 py-4 text-center text-sm font-black text-white transition hover:bg-bali-orange-dark"
             >
                 Selesaikan Rental
+            </a>
+        @elseif ($booking->status === Booking::STATUS_ONGOING && $booking->additional_charge_status === Booking::ADDITIONAL_CHARGE_PENDING_PAYMENT)
+            <div class="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-5 text-sm leading-7 text-orange-800">
+                <strong class="block text-bali-navy">Menunggu Pembayaran Biaya Tambahan</strong>
+                Penyewa perlu mengirim bukti pembayaran biaya tambahan sebelum rental dapat diselesaikan.
+            </div>
+        @elseif ($booking->status === Booking::STATUS_ONGOING && $booking->additional_charge_status === Booking::ADDITIONAL_CHARGE_WAITING_VERIFICATION)
+            <div class="mt-6 rounded-2xl border border-purple-200 bg-purple-50 p-5 text-sm leading-7 text-purple-800">
+                <strong class="block text-bali-navy">Menunggu Verifikasi Biaya Tambahan</strong>
+                Bukti pembayaran biaya tambahan sudah dikirim dan perlu diverifikasi admin pada menu pembayaran.
+            </div>
+
+            <a
+                href="{{ route('admin.payments.index', ['status' => \App\Models\Payment::STATUS_WAITING_VERIFICATION]) }}"
+                class="mt-4 block rounded-full bg-bali-navy px-6 py-4 text-center text-sm font-black text-white transition hover:bg-bali-slate"
+            >
+                Buka Verifikasi Pembayaran
             </a>
         @else
             <div class="mt-6 rounded-2xl bg-slate-100 p-5 text-sm leading-7 text-bali-muted">

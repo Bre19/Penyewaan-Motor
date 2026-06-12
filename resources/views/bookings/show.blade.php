@@ -21,11 +21,6 @@
 @endphp
 
 <section class="relative overflow-hidden bg-bali-navy py-20 text-white">
-    @if ($booking->canUploadPaymentProof())
-        <a href="{{ route('payments.create', $booking) }}" class="btn-primary">
-            Upload Bukti
-        </a>
-    @endif
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(13,148,136,0.34),transparent_30rem),radial-gradient(circle_at_85%_5%,rgba(249,115,22,0.28),transparent_26rem)]"></div>
 
     <div class="container-page relative">
@@ -51,11 +46,6 @@
 </section>
 
 <section class="py-16">
-    @if ($booking->canUploadPaymentProof())
-        <a href="{{ route('payments.create', $booking) }}" class="btn-primary">
-            Upload Bukti
-        </a>
-    @endif
     <div class="container-page grid gap-8 lg:grid-cols-[1fr_0.75fr]">
         <div class="space-y-8">
             @if (session('success'))
@@ -166,6 +156,78 @@
                     </div>
                 @endif
             </div>
+                        @if ($booking->hasAdditionalCharge())
+                <div class="surface-card rounded-[2rem] p-8">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <span class="badge-orange">Biaya Tambahan</span>
+                            <h3 class="mt-4 text-2xl font-black text-bali-navy">
+                                Pembayaran tambahan pengembalian
+                            </h3>
+                            <p class="mt-2 text-sm leading-7 text-bali-muted">
+                                Biaya ini muncul berdasarkan evaluasi admin saat motor dikembalikan.
+                            </p>
+                        </div>
+
+                        @if ($booking->canUploadAdditionalChargePaymentProof())
+                            <a href="{{ route('payments.create', $booking) }}" class="btn-primary">
+                                Upload Pembayaran Tambahan
+                            </a>
+                        @endif
+                    </div>
+
+                    <div class="mt-6 rounded-[1.5rem] border border-orange-200 bg-orange-50 p-5">
+                        <span class="block text-sm font-bold text-bali-muted">Nominal Biaya Tambahan</span>
+                        <strong class="mt-2 block text-3xl font-black text-bali-navy">
+                            Rp{{ number_format($booking->additional_charge_amount, 0, ',', '.') }}
+                        </strong>
+
+                        <p class="mt-3 text-sm leading-7 text-bali-muted">
+                            {{ $booking->additional_charge_reason ?: 'Tidak ada catatan alasan biaya tambahan.' }}
+                        </p>
+
+                        <div class="mt-4 rounded-2xl bg-white p-4 text-sm font-bold text-bali-navy">
+                            Status: {{ $booking->additionalChargeStatusLabel() }}
+                        </div>
+                    </div>
+
+                    @if ($additionalChargePayment)
+                        <div class="mt-6 grid gap-4 md:grid-cols-3">
+                            <div class="rounded-2xl bg-slate-100 p-4">
+                                <span class="block text-sm text-bali-muted">Kode</span>
+                                <strong class="mt-1 block text-bali-navy">
+                                    {{ $additionalChargePayment->payment_code }}
+                                </strong>
+                            </div>
+
+                            <div class="rounded-2xl bg-slate-100 p-4">
+                                <span class="block text-sm text-bali-muted">Metode</span>
+                                <strong class="mt-1 block text-bali-navy">
+                                    {{ $additionalChargePayment->methodLabel() }}
+                                </strong>
+                            </div>
+
+                            <div class="rounded-2xl bg-slate-100 p-4">
+                                <span class="block text-sm text-bali-muted">Status</span>
+                                <strong class="mt-1 block text-bali-navy">
+                                    {{ $additionalChargePayment->statusLabel() }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        @if ($additionalChargePayment->rejection_reason)
+                            <div class="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5">
+                                <strong class="block text-red-700">
+                                    Alasan Penolakan Pembayaran Tambahan
+                                </strong>
+                                <p class="mt-2 text-sm leading-7 text-red-700">
+                                    {{ $additionalChargePayment->rejection_reason }}
+                                </p>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            @endif
         </div>
 
         <aside class="h-fit space-y-6">
