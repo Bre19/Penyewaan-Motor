@@ -29,7 +29,7 @@
                 <a href="{{ route('home') }}" class="site-nav-link">Beranda</a>
                 <a href="{{ route('motorcycles.index') }}" class="site-nav-link">Katalog</a>
                 <a href="{{ route('home') }}#cara-sewa" class="site-nav-link">Cara Sewa</a>
-                <a href="{{ route('home') }}#keunggulan" class="site-nav-link">Keunggulan</a>
+                <!-- <a href="{{ route('home') }}#keunggulan" class="site-nav-link">Keunggulan</a> -->
                 <a href="{{ route('home') }}#kontak" class="site-nav-link">Kontak</a>
             </nav>
 
@@ -72,7 +72,7 @@
                         <a href="{{ route('home') }}" class="rounded-2xl px-4 py-3 text-bali-muted hover:bg-slate-100 hover:text-bali-navy">Beranda</a>
                         <a href="{{ route('motorcycles.index') }}" class="rounded-2xl px-4 py-3 text-bali-muted hover:bg-slate-100 hover:text-bali-navy">Katalog</a>
                         <a href="{{ route('home') }}#cara-sewa" class="rounded-2xl px-4 py-3 text-bali-muted hover:bg-slate-100 hover:text-bali-navy">Cara Sewa</a>
-                        <a href="{{ route('home') }}#keunggulan" class="rounded-2xl px-4 py-3 text-bali-muted hover:bg-slate-100 hover:text-bali-navy">Keunggulan</a>
+                        <!-- <a href="{{ route('home') }}#keunggulan" class="rounded-2xl px-4 py-3 text-bali-muted hover:bg-slate-100 hover:text-bali-navy">Keunggulan</a> -->
                     </nav>
 
                     <div class="mt-4 border-t border-bali-line pt-4">
@@ -143,7 +143,7 @@
                     <a href="{{ route('home') }}" class="hover:text-bali-navy">Beranda</a>
                     <a href="{{ route('motorcycles.index') }}" class="hover:text-bali-navy">Katalog Motor</a>
                     <a href="{{ route('home') }}#cara-sewa" class="hover:text-bali-navy">Cara Sewa</a>
-                    <a href="{{ route('home') }}#keunggulan" class="hover:text-bali-navy">Keunggulan</a>
+                    <!-- <a href="{{ route('home') }}#keunggulan" class="hover:text-bali-navy">Keunggulan</a> -->
                 </div>
             </div>
 

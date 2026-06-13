@@ -1,59 +1,163 @@
 @extends('layouts.public')
 
 @section('content')
-<section class="relative overflow-hidden bg-bali-navy py-20 text-white">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(13,148,136,0.34),transparent_30rem),radial-gradient(circle_at_85%_5%,rgba(249,115,22,0.28),transparent_26rem)]"></div>
-    <div class="container-page relative">
-        <span class="badge-teal bg-white/10 text-teal-100">Detail Motor</span>
-        <div class="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-                <h1 class="max-w-4xl text-5xl font-black leading-tight tracking-[-0.05em] md:text-6xl">{{ $motorcycle->brand }} {{ $motorcycle->model }}</h1>
-                <p class="mt-5 max-w-2xl leading-8 text-slate-300">Cek unit, harga, fasilitas, dan aturan safety sebelum mengajukan sewa.</p>
+
+<section class="relative overflow-hidden bg-bali-navy text-white">
+    <div class="absolute inset-0">
+        <div class="absolute -top-28 -left-28 h-[420px] w-[420px] rounded-full bg-teal-500/20 blur-[120px]"></div>
+        <div class="absolute -top-10 right-0 h-[380px] w-[380px] rounded-full bg-orange-500/20 blur-[120px]"></div>
+        <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-bali-soft to-transparent"></div>
+    </div>
+
+    <div class="container-page relative py-20">
+        <div class="max-w-3xl">
+            <span class="badge-teal bg-white/10 text-teal-200">
+                Detail Motor
+            </span>
+
+            <h1 class="mt-6 text-5xl font-black leading-[0.96] tracking-[-0.05em] md:text-6xl">
+                {{ $motorcycle->brand }} {{ $motorcycle->model }}
+            </h1>
+
+            <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                Lihat unit, fasilitas, dan syarat sebelum mengajukan penyewaan.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-3">
+                <span class="badge-green">Available</span>
+                <span class="badge-gray">Helm</span>
+                <span class="badge-gray">STNK</span>
+                <span class="badge-gray">Delivery</span>
             </div>
-            <div class="glass-panel rounded-[1.5rem] p-5"><span class="block text-xs font-black uppercase tracking-[0.18em] text-teal-200">Harga Sewa</span><strong class="mt-2 block text-3xl font-black">Rp{{ number_format($motorcycle->price_per_day, 0, ',', '.') }} <span class="text-base text-slate-300">/ hari</span></strong></div>
         </div>
     </div>
 </section>
 
-<section class="py-16">
-    <div class="container-page grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-        <div class="surface-card overflow-hidden rounded-[2rem] p-6">
-            <div class="relative flex min-h-[520px] items-center justify-center overflow-hidden rounded-[1.7rem] bg-gradient-to-br from-slate-100 via-white to-orange-50 p-8 text-center text-3xl font-black text-bali-navy">
-                <span class="absolute left-5 top-5 rounded-full bg-teal-50 px-4 py-2 text-xs font-black text-bali-teal-dark shadow-sm">Available</span>
-                @if ($motorcycle->image)<img src="{{ asset('storage/' . $motorcycle->image) }}" alt="{{ $motorcycle->brand }} {{ $motorcycle->model }}" class="h-full w-full object-contain">@else {{ $motorcycle->brand }} {{ $motorcycle->model }} @endif
-            </div>
-            <div class="mt-6 grid gap-4 sm:grid-cols-3">
-                <div class="rounded-2xl bg-slate-100 p-5"><span class="text-xs font-black uppercase tracking-wide text-bali-muted">Jenis</span><strong class="mt-2 block text-bali-navy">{{ $motorcycle->type ?? '-' }}</strong></div>
-                <div class="rounded-2xl bg-slate-100 p-5"><span class="text-xs font-black uppercase tracking-wide text-bali-muted">Tahun</span><strong class="mt-2 block text-bali-navy">{{ $motorcycle->year ?? '-' }}</strong></div>
-                <div class="rounded-2xl bg-slate-100 p-5"><span class="text-xs font-black uppercase tracking-wide text-bali-muted">Plat</span><strong class="mt-2 block text-bali-navy">{{ $motorcycle->plate_number }}</strong></div>
-            </div>
-        </div>
+<section class="-mt-12 pb-20">
+    <div class="container-page grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
 
+        {{-- LEFT CONTENT --}}
         <div class="space-y-6">
-            <div class="surface-card rounded-[2rem] p-8">
-                <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                    <div><span class="badge-orange">Unit Ready</span><h2 class="mt-4 text-4xl font-black tracking-[-0.04em] text-bali-navy">{{ $motorcycle->brand }} {{ $motorcycle->model }}</h2><p class="mt-2 font-semibold text-bali-muted">{{ $motorcycle->type ?? '-' }} • {{ $motorcycle->year ?? '-' }}</p></div>
-                    <span class="w-fit rounded-full bg-teal-50 px-4 py-2 text-xs font-black text-bali-teal-dark">Siap Disewa</span>
+
+            <div class="product-gallery p-6">
+                <div class="flex min-h-[520px] items-center justify-center overflow-hidden rounded-[1.6rem] bg-slate-50">
+                    @if ($motorcycle->image)
+                        <img
+                            src="{{ asset('storage/' . $motorcycle->image) }}"
+                            alt="{{ $motorcycle->brand }} {{ $motorcycle->model }}"
+                            class="h-full w-full object-contain p-8"
+                        >
+                    @else
+                        <div class="text-center">
+                            <div class="text-sm font-semibold text-bali-muted">
+                                Gambar motor belum tersedia
+                            </div>
+                        </div>
+                    @endif
                 </div>
-                <div class="mt-8 rounded-[1.7rem] bg-bali-navy p-6 text-white"><span class="block text-sm font-bold text-slate-300">Harga per hari</span><strong class="mt-2 block text-4xl font-black">Rp{{ number_format($motorcycle->price_per_day, 0, ',', '.') }}</strong><p class="mt-2 text-sm leading-6 text-slate-300">Total biaya dihitung otomatis berdasarkan durasi sewa.</p></div>
-                <div class="mt-8"><h3 class="text-xl font-black text-bali-navy">Deskripsi</h3><p class="mt-3 leading-8 text-bali-muted">{{ $motorcycle->description ?? 'Belum ada deskripsi untuk motor ini.' }}</p></div>
             </div>
 
-            <div class="rounded-[2rem] border border-teal-200 bg-teal-50 p-8">
-                <span class="badge-teal">Safety Requirement</span>
-                <h3 class="mt-4 text-2xl font-black text-bali-navy">Sebelum berkendara</h3>
-                <div class="mt-5 grid gap-3 text-sm font-bold text-bali-muted sm:grid-cols-2">
-                    <div class="rounded-2xl bg-white p-4">Wajib memakai helm</div>
-                    <div class="rounded-2xl bg-white p-4">Setujui terms & condition</div>
-                    <div class="rounded-2xl bg-white p-4">Admin cek rem, lampu, ban, STNK</div>
-                    <div class="rounded-2xl bg-white p-4">Safety Score saat rental selesai</div>
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="feature-card">
+                    <span class="text-xs font-bold uppercase text-bali-muted">Jenis</span>
+                    <strong class="mt-2 block text-lg text-bali-ink">
+                        {{ $motorcycle->type ?? '-' }}
+                    </strong>
+                </div>
+
+                <div class="feature-card">
+                    <span class="text-xs font-bold uppercase text-bali-muted">Tahun</span>
+                    <strong class="mt-2 block text-lg text-bali-ink">
+                        {{ $motorcycle->year ?? '-' }}
+                    </strong>
+                </div>
+
+                <div class="feature-card">
+                    <span class="text-xs font-bold uppercase text-bali-muted">Plat</span>
+                    <strong class="mt-2 block text-lg text-bali-ink">
+                        {{ $motorcycle->plate_number }}
+                    </strong>
                 </div>
             </div>
 
             <div class="surface-card rounded-[2rem] p-8">
-                <div class="flex flex-col gap-5 md:flex-row md:items-center md:justify-between"><div><h3 class="text-2xl font-black text-bali-navy">Ajukan Penyewaan</h3><p class="mt-2 max-w-xl text-sm leading-7 text-bali-muted">Pengajuan masuk ke admin untuk verifikasi sebelum pembayaran dan serah-terima motor.</p></div><a href="{{ route('bookings.create', $motorcycle) }}" class="btn-primary">Ajukan Sewa</a></div>
+                <h2 class="text-2xl font-black text-bali-ink">
+                    Deskripsi Motor
+                </h2>
+
+                <p class="mt-4 leading-8 text-bali-muted">
+                    {{ $motorcycle->description ?? 'Belum ada deskripsi untuk motor ini.' }}
+                </p>
+            </div>
+
+        </div>
+
+        {{-- RIGHT SIDEBAR (ONLY CONVERSION AREA) --}}
+        <div class="lg:sticky lg:top-24 lg:self-start">
+            <div class="surface-card rounded-[2rem] p-8 space-y-6">
+
+                <div>
+                    <span class="badge-orange">Unit Ready</span>
+
+                    <h2 class="mt-4 text-3xl font-black text-bali-navy">
+                        {{ $motorcycle->brand }} {{ $motorcycle->model }}
+                    </h2>
+
+                    <p class="mt-2 text-sm font-semibold text-bali-muted">
+                        {{ $motorcycle->type ?? '-' }} • {{ $motorcycle->year ?? '-' }}
+                    </p>
+                </div>
+
+                {{-- SINGLE PRICE BLOCK --}}
+                <div class="rounded-[1.6rem] bg-bali-navy p-6 text-white">
+                    <span class="text-sm text-slate-300">Harga per hari</span>
+                    <strong class="block text-4xl font-black mt-2">
+                        Rp{{ number_format($motorcycle->price_per_day, 0, ',', '.') }}
+                    </strong>
+                    <p class="text-sm mt-2 text-slate-300">
+                        Total menyesuaikan durasi sewa.
+                    </p>
+                </div>
+
+                <div class="grid gap-3">
+                    <div class="rounded-2xl bg-bali-soft p-4">
+                        <strong class="text-sm text-bali-ink">Termasuk</strong>
+                        <div class="mt-2 flex gap-2 flex-wrap">
+                            <span class="badge-gray">Helm</span>
+                            <span class="badge-gray">STNK</span>
+                            <span class="badge-gray">Checklist</span>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl bg-bali-soft p-4">
+                        <strong class="text-sm text-bali-ink">Safety Requirement</strong>
+                        <div class="mt-2 text-sm text-bali-muted space-y-1">
+                            <div>Wajib memakai helm</div>
+                            <div>Setujui syarat sebelum booking</div>
+                            <div>Unit dicek sebelum serah-terima</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ONLY CTA --}}
+                <div class="space-y-3 pt-2">
+                    <a href="{{ route('bookings.create', $motorcycle) }}" class="btn-primary w-full">
+                        Ajukan Penyewaan
+                    </a>
+
+                    <a href="{{ route('motorcycles.index') }}" class="btn-light w-full">
+                        Kembali ke Katalog
+                    </a>
+                </div>
+
+                <p class="text-xs text-center text-bali-muted">
+                    Pengajuan diverifikasi admin sebelum pembayaran.
+                </p>
+
             </div>
         </div>
+
     </div>
 </section>
+
 @endsection
