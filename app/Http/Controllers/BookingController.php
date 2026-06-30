@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Motorcycle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
@@ -19,8 +20,6 @@ class BookingController extends Controller
 
     public function store(Request $request, Motorcycle $motorcycle)
     {
-        abort_unless($motorcycle->status === Motorcycle::STATUS_AVAILABLE, 404);
-
         $validated = $request->validate([
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
@@ -34,37 +33,59 @@ class BookingController extends Controller
         $startDate = Carbon::parse($validated['start_date'])->startOfDay();
         $endDate = Carbon::parse($validated['end_date'])->startOfDay();
 
-        if ($this->hasOverlappingBooking($motorcycle, $startDate, $endDate)) {
-            throw ValidationException::withMessages([
-                'start_date' => 'Motor ini sudah memiliki pengajuan atau penyewaan pada rentang tanggal tersebut.',
+        return DB::transaction(function () use ($request, $motorcycle, $startDate, $endDate, $validated) {
+
+            // 🔒 Lock row biar tidak double booking
+            $motorcycle = Motorcycle::lockForUpdate()->find($motorcycle->id);
+
+            if ($motorcycle->status !== Motorcycle::STATUS_AVAILABLE) {
+                throw ValidationException::withMessages([
+                    'start_date' => 'Motor sudah tidak tersedia.',
+                ]);
+            }
+
+            if ($this->hasOverlappingBooking($motorcycle, $startDate, $endDate)) {
+                throw ValidationException::withMessages([
+                    'start_date' => 'Motor ini sudah memiliki booking di tanggal tersebut.',
+                ]);
+            }
+
+            $durationDays = $startDate->diffInDays($endDate) + 1;
+            $pricePerDay = (float) $motorcycle->price_per_day;
+            $totalPrice = $durationDays * $pricePerDay;
+
+            $booking = Booking::create([
+                'user_id' => $request->user()->id,
+                'motorcycle_id' => $motorcycle->id,
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
+                'duration_days' => $durationDays,
+                'delivery_location' => $validated['delivery_location'],
+                'customer_note' => $validated['customer_note'] ?? null,
+                'price_per_day' => $pricePerDay,
+                'total_price' => $totalPrice,
+                'status' => Booking::STATUS_PENDING_APPROVAL,
+                'terms_accepted_at' => now(),
+                'terms_version' => Booking::TERMS_VERSION,
+                'terms_ip_address' => $request->ip(),
             ]);
-        }
 
-        $durationDays = $startDate->diffInDays($endDate) + 1;
-        $pricePerDay = (float) $motorcycle->price_per_day;
-        $totalPrice = $durationDays * $pricePerDay;
+            // 🔒 Lock motor
+            $motorcycle->update([
+                'status' => Motorcycle::STATUS_UNAVAILABLE
+            ]);
 
-        $booking = Booking::create([
-            'user_id' => $request->user()->id,
-            'motorcycle_id' => $motorcycle->id,
-            'start_date' => $startDate->toDateString(),
-            'end_date' => $endDate->toDateString(),
-            'duration_days' => $durationDays,
-            'delivery_location' => $validated['delivery_location'],
-            'customer_note' => $validated['customer_note'] ?? null,
-            'price_per_day' => $pricePerDay,
-            'total_price' => $totalPrice,
-            'status' => Booking::STATUS_PENDING_APPROVAL,
-            'terms_accepted_at' => now(),
-            'terms_version' => Booking::TERMS_VERSION,
-            'terms_ip_address' => $request->ip(),
-        ]);
+            $booking->recordStatusHistory(
+                null,
+                Booking::STATUS_PENDING_APPROVAL,
+                $request->user()->id,
+                'Booking dibuat oleh penyewa.'
+            );
 
-        $booking->recordStatusHistory(null, Booking::STATUS_PENDING_APPROVAL, $request->user()->id, 'Booking dibuat oleh penyewa.');
-
-        return redirect()
-            ->route('bookings.show', $booking)
-            ->with('success', 'Pengajuan penyewaan berhasil dikirim dan menunggu persetujuan admin.');
+            return redirect()
+                ->route('bookings.show', $booking)
+                ->with('success', 'Pengajuan penyewaan berhasil dikirim.');
+        });
     }
 
     public function show(Request $request, Booking $booking)
@@ -89,21 +110,34 @@ class BookingController extends Controller
         abort_unless($booking->user_id === $request->user()->id, 403);
 
         if (! $booking->canBeCancelledByCustomer()) {
-            return back()->with('error', 'Booking ini sudah tidak dapat dibatalkan oleh penyewa.');
+            return back()->with('error', 'Booking tidak bisa dibatalkan.');
         }
 
-        $oldStatus = $booking->status;
+        return DB::transaction(function () use ($request, $booking) {
 
-        $booking->update([
-            'status' => Booking::STATUS_CANCELLED,
-            'cancelled_at' => now(),
-        ]);
+            $oldStatus = $booking->status;
 
-        $booking->recordStatusHistory($oldStatus, Booking::STATUS_CANCELLED, $request->user()->id, 'Booking dibatalkan oleh penyewa.');
+            $booking->update([
+                'status' => Booking::STATUS_CANCELLED,
+                'cancelled_at' => now(),
+            ]);
 
-        return redirect()
-            ->route('dashboard')
-            ->with('success', 'Booking berhasil dibatalkan.');
+            // 🔓 Balikin motor jadi available
+            $booking->motorcycle->update([
+                'status' => Motorcycle::STATUS_AVAILABLE
+            ]);
+
+            $booking->recordStatusHistory(
+                $oldStatus,
+                Booking::STATUS_CANCELLED,
+                $request->user()->id,
+                'Booking dibatalkan oleh penyewa.'
+            );
+
+            return redirect()
+                ->route('dashboard')
+                ->with('success', 'Booking berhasil dibatalkan.');
+        });
     }
 
     private function hasOverlappingBooking(Motorcycle $motorcycle, Carbon $startDate, Carbon $endDate): bool

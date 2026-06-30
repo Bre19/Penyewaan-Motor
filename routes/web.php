@@ -76,7 +76,7 @@ Route::middleware(['auth', 'admin'])
             ->name('bookings.storeCompletion');
 
         Route::resource('motorcycles', AdminMotorcycleController::class)
-            ->except(['show', 'destroy']);
+            ->except(['show']);
 
         Route::get('/payments', [AdminPaymentController::class, 'index'])
             ->name('payments.index');

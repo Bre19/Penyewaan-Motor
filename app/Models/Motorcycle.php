@@ -33,6 +33,12 @@ class Motorcycle extends Model
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
+
     public static function statusLabels(): array
     {
         return [
@@ -47,8 +53,70 @@ class Motorcycle extends Model
         return self::statusLabels()[$this->status] ?? 'Unknown';
     }
 
+    public function isAvailable(): bool
+    {
+        return $this->status === self::STATUS_AVAILABLE;
+    }
+
+    public function isUnavailable(): bool
+    {
+        return $this->status === self::STATUS_UNAVAILABLE;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATION
+    |--------------------------------------------------------------------------
+    */
+
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | BUSINESS LOGIC
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Cek apakah motor sedang dipakai (booking aktif)
+     */
+    public function hasActiveBooking(): bool
+    {
+        return $this->bookings()
+            ->whereIn('status', [
+                \App\Models\Booking::STATUS_APPROVED,
+                \App\Models\Booking::STATUS_WAITING_PAYMENT,
+                \App\Models\Booking::STATUS_WAITING_PAYMENT_VERIFICATION,
+                \App\Models\Booking::STATUS_PAYMENT_CONFIRMED,
+                \App\Models\Booking::STATUS_READY_TO_DELIVER,
+                \App\Models\Booking::STATUS_ONGOING,
+            ])
+            ->exists();
+    }
+
+    /**
+     * Cek apakah aman untuk dihapus
+     */
+    public function canBeDeleted(): bool
+    {
+        return !$this->hasActiveBooking();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODEL EVENT (AUTO PROTECTION)
+    |--------------------------------------------------------------------------
+    */
+
+    protected static function booted()
+    {
+        static::deleting(function ($motorcycle) {
+            if ($motorcycle->hasActiveBooking()) {
+                throw new \Exception('Motor tidak bisa dihapus karena sedang digunakan.');
+            }
+        });
     }
 }

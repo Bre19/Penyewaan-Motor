@@ -16,6 +16,11 @@
                 'active' => request()->routeIs('admin.dashboard'),
             ],
             [
+                'label' => 'Motor',
+                'route' => route('admin.motorcycles.index'),
+                'active' => request()->routeIs('admin.motorcycles.*'),
+            ],
+            [
                 'label' => 'Booking',
                 'route' => route('admin.bookings.index'),
                 'active' => request()->routeIs('admin.bookings.*'),

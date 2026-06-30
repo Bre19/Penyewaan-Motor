@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\RentalChecklist;
 use App\Models\RentalSafetyScore;
+use App\Models\Motorcycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -19,8 +20,7 @@ class BookingController extends Controller
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $query = Booking::with(['user', 'motorcycle'])
-            ->latest();
+        $query = Booking::with(['user', 'motorcycle'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $validated['status']);
@@ -145,15 +145,23 @@ class BookingController extends Controller
             'rejection_reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        $oldStatus = $booking->status;
+        DB::transaction(function () use ($request, $booking, $validated) {
 
-        $booking->update([
-            'status' => Booking::STATUS_REJECTED,
-            'rejected_at' => now(),
-            'rejection_reason' => $validated['rejection_reason'],
-        ]);
+            $oldStatus = $booking->status;
 
-        $booking->recordStatusHistory($oldStatus, Booking::STATUS_REJECTED, $request->user()->id, $validated['rejection_reason']);
+            $booking->update([
+                'status' => Booking::STATUS_REJECTED,
+                'rejected_at' => now(),
+                'rejection_reason' => $validated['rejection_reason'],
+            ]);
+
+            // Unlock motor
+            $booking->motorcycle->update([
+                'status' => Motorcycle::STATUS_AVAILABLE
+            ]);
+
+            $booking->recordStatusHistory($oldStatus, Booking::STATUS_REJECTED, $request->user()->id, $validated['rejection_reason']);
+        });
 
         return redirect()
             ->route('admin.bookings.show', $booking)
@@ -264,7 +272,7 @@ class BookingController extends Controller
 
         return redirect()
             ->route('admin.bookings.show', $booking)
-            ->with('success', 'Checklist serah-terima berhasil disimpan. Booking sekarang berstatus sedang berjalan.');
+            ->with('success', 'Checklist serah-terima berhasil disimpan.');
     }
 
     public function complete(Booking $booking)
@@ -353,7 +361,7 @@ class BookingController extends Controller
                     $oldStatus,
                     Booking::STATUS_ONGOING,
                     $request->user()->id,
-                    'Rental dievaluasi. Penyewa perlu membayar biaya tambahan sebelum transaksi selesai.'
+                    'Rental dievaluasi, menunggu pembayaran biaya tambahan.'
                 );
             } else {
                 $booking->update([
@@ -365,11 +373,16 @@ class BookingController extends Controller
                     'additional_charge_confirmed_at' => null,
                 ]);
 
+                // 🔓 Unlock motor setelah selesai
+                $booking->motorcycle->update([
+                    'status' => Motorcycle::STATUS_AVAILABLE
+                ]);
+
                 $booking->recordStatusHistory(
                     $oldStatus,
                     Booking::STATUS_COMPLETED,
                     $request->user()->id,
-                    'Rental diselesaikan tanpa biaya tambahan dan safety score dihitung.'
+                    'Rental selesai tanpa biaya tambahan.'
                 );
             }
 
@@ -385,8 +398,8 @@ class BookingController extends Controller
             ->with(
                 'success',
                 $additionalChargeAmount > 0
-                    ? 'Rental berhasil dievaluasi. Penyewa perlu membayar biaya tambahan.'
-                    : 'Rental berhasil diselesaikan dan Safety Score telah dihitung.'
+                    ? 'Menunggu pembayaran biaya tambahan.'
+                    : 'Rental selesai.'
             );
     }
 }

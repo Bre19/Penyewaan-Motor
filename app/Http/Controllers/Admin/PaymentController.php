@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Motorcycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -18,8 +19,7 @@ class PaymentController extends Controller
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $query = Payment::with(['booking.motorcycle', 'user'])
-            ->latest();
+        $query = Payment::with(['booking.motorcycle', 'user'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $validated['status']);
@@ -102,11 +102,15 @@ class PaymentController extends Controller
                     'additional_charge_confirmed_at' => now(),
                 ]);
 
+                $booking->motorcycle->update([
+                    'status' => Motorcycle::STATUS_AVAILABLE
+                ]);
+
                 $booking->recordStatusHistory(
                     $oldStatus,
                     Booking::STATUS_COMPLETED,
                     auth()->id(),
-                    'Biaya tambahan dikonfirmasi oleh admin. Rental dinyatakan selesai.'
+                    'Biaya tambahan dikonfirmasi. Rental selesai dan motor tersedia kembali.'
                 );
             }
         });
