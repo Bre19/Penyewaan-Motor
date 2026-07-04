@@ -1,6 +1,15 @@
 @extends('layouts.public')
 
 @section('content')
+@php
+
+$totalUnit = $motorcycle->stocks->count();
+
+$availableUnit = $motorcycle->stocks
+    ->where('status', 'available')
+    ->count();
+
+@endphp
 <section class="relative overflow-hidden bg-bali-navy py-20 text-white">
     <div class="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(13,148,136,0.34),transparent_30rem),radial-gradient(circle_at_85%_5%,rgba(249,115,22,0.28),transparent_26rem)]"></div>
 
@@ -21,9 +30,23 @@
     <div class="container-page grid gap-8 lg:grid-cols-[0.72fr_1fr]">
         <aside class="surface-card h-fit rounded-[2rem] p-6">
             <div class="relative flex h-72 items-center justify-center overflow-hidden rounded-[1.7rem] bg-gradient-to-br from-slate-100 via-white to-orange-50 p-6 text-center font-black text-bali-navy">
-                <span class="absolute left-5 top-5 rounded-full bg-white px-4 py-2 text-xs font-black text-bali-teal-dark shadow-sm">
-                    Ready
+                @if($availableUnit > 0)
+
+                <span class="absolute left-5 top-5 rounded-full bg-emerald-500 px-4 py-2 text-xs font-black text-white shadow-sm">
+
+                    {{ $availableUnit }} Unit Ready
+
                 </span>
+
+                @else
+
+                <span class="absolute left-5 top-5 rounded-full bg-red-500 px-4 py-2 text-xs font-black text-white shadow-sm">
+
+                    Stok Habis
+
+                </span>
+
+                @endif
 
                 @if ($motorcycle->image)
                     <img src="{{ asset('storage/' . $motorcycle->image) }}" alt="{{ $motorcycle->brand }} {{ $motorcycle->model }}" class="h-full w-full object-contain">
@@ -49,14 +72,55 @@
             </div>
 
             <div class="mt-6 grid gap-3 text-sm">
-                <div class="flex justify-between gap-4 rounded-2xl bg-slate-100 p-4">
-                    <span class="font-bold text-bali-muted">Plat</span>
-                    <strong class="text-bali-navy">{{ $motorcycle->plate_number }}</strong>
+
+                <div class="flex justify-between rounded-2xl bg-slate-100 p-4">
+
+                    <span class="font-bold text-bali-muted">
+
+                        Total Unit
+
+                    </span>
+
+                    <strong class="text-bali-navy">
+
+                        {{ $totalUnit }}
+
+                    </strong>
+
                 </div>
-                <div class="flex justify-between gap-4 rounded-2xl bg-slate-100 p-4">
-                    <span class="font-bold text-bali-muted">Status awal</span>
-                    <strong class="text-bali-teal-dark">Menunggu Persetujuan</strong>
+
+                <div class="flex justify-between rounded-2xl bg-emerald-50 p-4">
+
+                    <span class="font-bold text-emerald-700">
+
+                        Unit Tersedia
+
+                    </span>
+
+                    <strong class="text-emerald-700">
+
+                        {{ $availableUnit }}
+
+                    </strong>
+
                 </div>
+
+                <div class="flex justify-between rounded-2xl bg-slate-100 p-4">
+
+                    <span class="font-bold text-bali-muted">
+
+                        Status Booking
+
+                    </span>
+
+                    <strong class="text-bali-teal-dark">
+
+                        Menunggu Persetujuan
+
+                    </strong>
+
+                </div>
+
             </div>
         </aside>
 
@@ -65,7 +129,11 @@
                 <span class="badge-orange">Form Booking</span>
                 <h2 class="mt-4 text-3xl font-black text-bali-navy">Detail pengajuan</h2>
                 <p class="mt-2 text-sm leading-7 text-bali-muted">
-                    Pastikan tanggal dan lokasi pengantaran sudah benar sebelum dikirim.
+
+                    Sistem akan memilih secara otomatis salah satu unit motor yang tersedia
+                    sesuai tanggal penyewaan Anda. Nomor plat dan unit fisik akan ditentukan
+                    setelah proses booking berhasil dibuat.
+
                 </p>
             </div>
 

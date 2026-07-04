@@ -18,12 +18,16 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+            // Kode internal unit
             $table->string('stock_code')->unique();
 
+            // Plat kendaraan
             $table->string('plate_number')->unique();
 
+            // Foto unit ini
             $table->string('image')->nullable();
 
+            // Status unit
             $table->enum('status', [
                 'available',
                 'booked',
@@ -32,6 +36,12 @@ return new class extends Migration
                 'inactive',
             ])->default('available');
 
+            // GPS Dummy (persiapan fitur tracking)
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+            $table->timestamp('last_gps_update_at')->nullable();
+
+            // Catatan admin
             $table->text('notes')->nullable();
 
             $table->timestamps();
@@ -39,6 +49,11 @@ return new class extends Migration
             $table->index([
                 'motorcycle_id',
                 'status',
+            ]);
+
+            $table->index([
+                'latitude',
+                'longitude',
             ]);
         });
     }

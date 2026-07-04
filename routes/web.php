@@ -3,7 +3,9 @@
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MotorcycleController as AdminMotorcycleController;
+use App\Http\Controllers\Admin\MotorcycleStockController as AdminMotorcycleStockController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\GpsTrackingController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -54,6 +56,10 @@ Route::middleware(['auth', 'admin'])
         Route::get('/bookings/{booking}', [AdminBookingController::class, 'show'])
             ->name('bookings.show');
 
+        Route::get('/gps-tracker', function () {
+            return view('admin.gps.index');
+        })->name('gps.index');
+
         Route::patch('/bookings/{booking}/approve', [AdminBookingController::class, 'approve'])
             ->name('bookings.approve');
 
@@ -76,6 +82,12 @@ Route::middleware(['auth', 'admin'])
             ->name('bookings.storeCompletion');
 
         Route::resource('motorcycles', AdminMotorcycleController::class)
+            ->except(['show']);
+        
+        Route::get('/gps-tracking', [GpsTrackingController::class, 'index'])
+            ->name('gps.index');
+
+        Route::resource('motorcycle-stocks', AdminMotorcycleStockController::class)
             ->except(['show']);
 
         Route::get('/payments', [AdminPaymentController::class, 'index'])

@@ -18,7 +18,7 @@ class MotorcycleController extends Controller
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $query = Motorcycle::query()->latest();
+        $query = Motorcycle::with('stocks')->latest();
 
         if (!empty($validated['status'])) {
             $query->where('status', $validated['status']);

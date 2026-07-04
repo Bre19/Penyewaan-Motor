@@ -11,26 +11,65 @@
     @php
         $adminLinks = [
             [
+                'type' => 'link',
                 'label' => 'Dashboard',
                 'route' => route('admin.dashboard'),
                 'active' => request()->routeIs('admin.dashboard'),
             ],
+
             [
-                'label' => 'Motor',
-                'route' => route('admin.motorcycles.index'),
-                'active' => request()->routeIs('admin.motorcycles.*'),
+                'type' => 'title',
+                'label' => 'Operasional',
             ],
+
             [
+                'type' => 'link',
                 'label' => 'Booking',
                 'route' => route('admin.bookings.index'),
                 'active' => request()->routeIs('admin.bookings.*'),
             ],
+
             [
+                'type' => 'link',
                 'label' => 'Pembayaran',
                 'route' => route('admin.payments.index'),
                 'active' => request()->routeIs('admin.payments.*'),
             ],
+
             [
+                'type' => 'title',
+                'label' => 'Motor',
+            ],
+
+            [
+                'type' => 'link',
+                'label' => 'Daftar Motor',
+                'route' => route('admin.motorcycles.index'),
+                'active' => request()->routeIs('admin.motorcycles.*'),
+            ],
+
+            
+            [
+                'type' => 'link',
+                'label' => 'Kelola Unit',
+                'route' => route('admin.motorcycle-stocks.index'),
+                'active' => request()->routeIs('admin.motorcycle-stocks.*'),
+            ],
+            
+            [
+                'type' => 'link',
+                'label' => 'GPS Tracker',
+                'route' => route('admin.gps.index'),
+                'active' => request()->routeIs('admin.gps.*'),
+            ],
+            
+            [
+                'type' => 'title',
+                'label' => 'Website',
+            ],
+
+            [
+                'type' => 'link',
                 'label' => 'Katalog Website',
                 'route' => route('motorcycles.index'),
                 'active' => false,
@@ -64,14 +103,27 @@
 
                 <nav class="mt-8 grid gap-2">
                     @foreach ($adminLinks as $link)
-                        <a
-                            href="{{ $link['route'] }}"
-                            class="admin-nav-link {{ $link['active'] ? 'admin-nav-link-active' : 'admin-nav-link-idle' }}"
-                        >
-                            <span class="status-dot"></span>
-                            {{ $link['label'] }}
-                        </a>
+
+                        @if ($link['type'] === 'title')
+
+                            <div class="mt-5 px-3 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
+                                {{ $link['label'] }}
+                            </div>
+
+                        @else
+
+                            <a
+                                href="{{ $link['route'] }}"
+                                class="admin-nav-link {{ $link['active'] ? 'admin-nav-link-active' : 'admin-nav-link-idle' }}"
+                            >
+                                <span class="status-dot"></span>
+                                {{ $link['label'] }}
+                            </a>
+
+                        @endif
+
                     @endforeach
+
                 </nav>
 
                 <div class="mt-auto rounded-[1.5rem] border border-white/10 bg-white/10 p-5">
@@ -131,13 +183,26 @@
 
                             <nav class="grid gap-2">
                                 @foreach ($adminLinks as $link)
-                                    <a
-                                        href="{{ $link['route'] }}"
-                                        class="rounded-2xl px-4 py-3 text-sm font-black {{ $link['active'] ? 'bg-bali-navy text-white' : 'text-bali-muted hover:bg-slate-100 hover:text-bali-navy' }}"
-                                    >
-                                        {{ $link['label'] }}
-                                    </a>
+
+                                    @if ($link['type'] === 'title')
+
+                                        <div class="mt-4 px-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
+                                            {{ $link['label'] }}
+                                        </div>
+
+                                    @else
+
+                                        <a
+                                            href="{{ $link['route'] }}"
+                                            class="rounded-2xl px-4 py-3 text-sm font-black {{ $link['active'] ? 'bg-bali-navy text-white' : 'text-bali-muted hover:bg-slate-100 hover:text-bali-navy' }}"
+                                        >
+                                            {{ $link['label'] }}
+                                        </a>
+
+                                    @endif
+
                                 @endforeach
+
                             </nav>
 
                             <form method="POST" action="{{ route('logout') }}" class="mt-4 border-t border-bali-line pt-4">

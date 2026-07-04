@@ -7,7 +7,6 @@ use App\Models\Booking;
 use App\Models\RentalChecklist;
 use App\Models\MotorcycleStock;
 use App\Models\RentalSafetyScore;
-use App\Models\Motorcycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -156,16 +155,18 @@ class BookingController extends Controller
                 'rejection_reason' => $validated['rejection_reason'],
             ]);
 
-            $booking->motorcycle->update([
-                'status' => Motorcycle::STATUS_AVAILABLE
-            ]);
-
-            $booking->recordStatusHistory($oldStatus, Booking::STATUS_REJECTED, $request->user()->id, $validated['rejection_reason']);
             if ($booking->motorcycleStock) {
                 $booking->motorcycleStock->update([
                     'status' => MotorcycleStock::STATUS_AVAILABLE,
                 ]);
             }
+
+            $booking->recordStatusHistory(
+                $oldStatus,
+                Booking::STATUS_REJECTED,
+                $request->user()->id,
+                $validated['rejection_reason']
+            );
         });
 
         return redirect()
@@ -384,11 +385,13 @@ class BookingController extends Controller
                     'additional_charge_confirmed_at' => null,
                 ]);
 
-                $booking->motorcycle->update([
-                    'status' => Motorcycle::STATUS_AVAILABLE
-                ]);
+                if ($booking->motorcycleStock) {
+                        $booking->motorcycleStock->update([
+                            'status' => MotorcycleStock::STATUS_AVAILABLE,
+                        ]);
+                    }
 
-                $booking->recordStatusHistory(
+                    $booking->recordStatusHistory(
                     $oldStatus,
                     Booking::STATUS_COMPLETED,
                     $request->user()->id,
@@ -411,5 +414,14 @@ class BookingController extends Controller
                     ? 'Menunggu pembayaran biaya tambahan.'
                     : 'Rental selesai.'
             );
+    }
+
+    private function syncMotorcycleStockStatus(Booking $booking): void
+    {
+        if (! $booking->motorcycleStock) {
+            return;
+        }
+
+        $booking->motorcycleStock->syncStatus();
     }
 }

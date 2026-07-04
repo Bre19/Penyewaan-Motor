@@ -23,8 +23,20 @@ class MotorcycleStock extends Model
         'plate_number',
         'image',
         'status',
+        'latitude',
+        'longitude',
+        'last_gps_update_at',
         'notes',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
+            'last_gps_update_at' => 'datetime',
+        ];
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -53,6 +65,11 @@ class MotorcycleStock extends Model
         return $this->status === self::STATUS_AVAILABLE;
     }
 
+    public function canBeDeleted(): bool
+    {
+        return ! $this->hasActiveBooking();
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATION
@@ -68,11 +85,11 @@ class MotorcycleStock extends Model
     }
 
     /**
-     * Booking yang pernah menggunakan unit ini.
+     * Booking yang menggunakan unit ini.
      */
     public function bookings(): HasMany
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class, 'motorcycle_stock_id');
     }
 
     /*
@@ -103,20 +120,10 @@ class MotorcycleStock extends Model
      */
     public function syncStatus(): void
     {
-        if ($this->status === self::STATUS_MAINTENANCE) {
-            return;
-        }
-
-        if ($this->status === self::STATUS_INACTIVE) {
-            return;
-        }
-
-        if (! $this->hasActiveBooking()) {
-
-            $this->update([
-                'status' => self::STATUS_AVAILABLE,
-            ]);
-
+        if (in_array($this->status, [
+            self::STATUS_MAINTENANCE,
+            self::STATUS_INACTIVE,
+        ], true)) {
             return;
         }
 
@@ -133,6 +140,11 @@ class MotorcycleStock extends Model
             ->first();
 
         if (! $activeBooking) {
+
+            $this->update([
+                'status' => self::STATUS_AVAILABLE,
+            ]);
+
             return;
         }
 
@@ -152,8 +164,22 @@ class MotorcycleStock extends Model
                 => self::STATUS_AVAILABLE,
         };
 
+        if ($this->status !== $status) {
+            $this->update([
+                'status' => $status,
+            ]);
+        }
+    }
+
+    /**
+     * GPS Dummy Bali.
+     */
+    public function generateDummyLocation(): void
+    {
         $this->update([
-            'status' => $status,
+            'latitude' => mt_rand(-89000000, -80000000) / 10000000,
+            'longitude' => mt_rand(1145000000, 1158000000) / 10000000,
+            'last_gps_update_at' => now(),
         ]);
     }
 
@@ -165,6 +191,22 @@ class MotorcycleStock extends Model
 
     protected static function booted(): void
     {
+        static::creating(function (MotorcycleStock $stock) {
+
+            if (! $stock->latitude) {
+                $stock->latitude = mt_rand(-89000000, -80000000) / 10000000;
+            }
+
+            if (! $stock->longitude) {
+                $stock->longitude = mt_rand(1145000000, 1158000000) / 10000000;
+            }
+
+            if (! $stock->last_gps_update_at) {
+                $stock->last_gps_update_at = now();
+            }
+
+        });
+
         static::deleting(function (MotorcycleStock $stock) {
 
             if ($stock->hasActiveBooking()) {
