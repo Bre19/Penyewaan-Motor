@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
+use App\Models\MotorcycleStock;
 
 class Booking extends Model
 {
@@ -34,6 +35,7 @@ class Booking extends Model
     protected $fillable = [
         'user_id',
         'motorcycle_id',
+        'motorcycle_stock_id',
         'booking_code',
         'start_date',
         'end_date',
@@ -230,6 +232,29 @@ class Booking extends Model
     public function motorcycle(): BelongsTo
     {
         return $this->belongsTo(Motorcycle::class);
+    }
+
+    public function motorcycleStock(): BelongsTo
+    {
+        return $this->belongsTo(MotorcycleStock::class);
+    }
+
+    public function rentedMotorcycle(): ?Motorcycle
+    {
+        return $this->motorcycleStock?->motorcycle
+            ?? $this->motorcycle;
+    }
+
+    public function hasAssignedStock(): bool
+    {
+        return $this->motorcycle_stock_id !== null;
+    }
+    
+    public function syncMotorcycleStock(): void
+    {
+        if ($this->motorcycleStock) {
+            $this->motorcycleStock->syncStatus();
+        }
     }
 
     public function payments(): HasMany

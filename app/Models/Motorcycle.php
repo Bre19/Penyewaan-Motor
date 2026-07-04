@@ -19,10 +19,13 @@ class Motorcycle extends Model
         'model',
         'type',
         'year',
+
         'plate_number',
+
         'price_per_day',
         'image',
         'description',
+
         'status',
     ];
 
@@ -55,12 +58,12 @@ class Motorcycle extends Model
 
     public function isAvailable(): bool
     {
-        return $this->status === self::STATUS_AVAILABLE;
+        return $this->availableStockCount() > 0;
     }
 
     public function isUnavailable(): bool
     {
-        return $this->status === self::STATUS_UNAVAILABLE;
+        return $this->availableStockCount() === 0;
     }
 
     /*
@@ -69,9 +72,21 @@ class Motorcycle extends Model
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * Relasi lama.
+     * Tetap dipertahankan agar tidak merusak kode yang sudah ada.
+     */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Seluruh unit fisik motor.
+     */
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(MotorcycleStock::class);
     }
 
     /*
@@ -81,42 +96,77 @@ class Motorcycle extends Model
     */
 
     /**
-     * Cek apakah motor sedang dipakai (booking aktif)
+     * Total seluruh stock.
+     */
+    public function totalStock(): int
+    {
+        return $this->stocks()->count();
+    }
+
+    /**
+     * Total stock yang siap disewa.
+     */
+    public function availableStockCount(): int
+    {
+        return $this->stocks()
+            ->where('status', MotorcycleStock::STATUS_AVAILABLE)
+            ->count();
+    }
+
+    /**
+     * Query stock yang tersedia.
+     */
+    public function availableStocks()
+    {
+        return $this->stocks()
+            ->where('status', MotorcycleStock::STATUS_AVAILABLE);
+    }
+
+    /**
+     * Apakah ada salah satu unit yang sedang digunakan.
      */
     public function hasActiveBooking(): bool
     {
-        return $this->bookings()
-            ->whereIn('status', [
-                \App\Models\Booking::STATUS_APPROVED,
-                \App\Models\Booking::STATUS_WAITING_PAYMENT,
-                \App\Models\Booking::STATUS_WAITING_PAYMENT_VERIFICATION,
-                \App\Models\Booking::STATUS_PAYMENT_CONFIRMED,
-                \App\Models\Booking::STATUS_READY_TO_DELIVER,
-                \App\Models\Booking::STATUS_ONGOING,
-            ])
+        return $this->stocks()
+            ->whereHas('bookings', function ($query) {
+                $query->whereIn('status', [
+                    Booking::STATUS_APPROVED,
+                    Booking::STATUS_WAITING_PAYMENT,
+                    Booking::STATUS_WAITING_PAYMENT_VERIFICATION,
+                    Booking::STATUS_PAYMENT_CONFIRMED,
+                    Booking::STATUS_READY_TO_DELIVER,
+                    Booking::STATUS_ONGOING,
+                ]);
+            })
             ->exists();
     }
 
     /**
-     * Cek apakah aman untuk dihapus
+     * Apakah master motor boleh dihapus.
      */
     public function canBeDeleted(): bool
     {
-        return !$this->hasActiveBooking();
+        return ! $this->hasActiveBooking();
     }
 
     /*
     |--------------------------------------------------------------------------
-    | MODEL EVENT (AUTO PROTECTION)
+    | MODEL EVENT
     |--------------------------------------------------------------------------
     */
 
-    protected static function booted()
+    protected static function booted(): void
     {
-        static::deleting(function ($motorcycle) {
+        static::deleting(function (Motorcycle $motorcycle) {
+
             if ($motorcycle->hasActiveBooking()) {
-                throw new \Exception('Motor tidak bisa dihapus karena sedang digunakan.');
+                throw new \Exception(
+                    'Motor tidak dapat dihapus karena masih memiliki unit yang sedang digunakan.'
+                );
             }
+
+            $motorcycle->stocks()->delete();
+
         });
     }
 }

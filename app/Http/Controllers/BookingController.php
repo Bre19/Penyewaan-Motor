@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\MotorcycleStock;
 use App\Models\Motorcycle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class BookingController extends Controller
 {
     public function create(Motorcycle $motorcycle)
     {
-        abort_unless($motorcycle->status === Motorcycle::STATUS_AVAILABLE, 404);
+        abort_unless($motorcycle->availableStockCount() > 0, 404);
 
         return view('bookings.create', compact('motorcycle'));
     }
@@ -35,18 +36,23 @@ class BookingController extends Controller
 
         return DB::transaction(function () use ($request, $motorcycle, $startDate, $endDate, $validated) {
 
-            // 🔒 Lock row biar tidak double booking
             $motorcycle = Motorcycle::lockForUpdate()->find($motorcycle->id);
 
-            if ($motorcycle->status !== Motorcycle::STATUS_AVAILABLE) {
+            $availableStock = MotorcycleStock::query()
+                ->where('motorcycle_id', $motorcycle->id)
+                ->where('status', MotorcycleStock::STATUS_AVAILABLE)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $availableStock) {
                 throw ValidationException::withMessages([
-                    'start_date' => 'Motor sudah tidak tersedia.',
+                    'start_date' => 'Seluruh unit motor sedang tidak tersedia.',
                 ]);
             }
 
-            if ($this->hasOverlappingBooking($motorcycle, $startDate, $endDate)) {
+            if ($this->hasOverlappingBooking($availableStock, $startDate, $endDate)) {
                 throw ValidationException::withMessages([
-                    'start_date' => 'Motor ini sudah memiliki booking di tanggal tersebut.',
+                    'start_date' => 'Unit motor yang tersedia memiliki jadwal yang bertabrakan.',
                 ]);
             }
 
@@ -57,6 +63,7 @@ class BookingController extends Controller
             $booking = Booking::create([
                 'user_id' => $request->user()->id,
                 'motorcycle_id' => $motorcycle->id,
+                'motorcycle_stock_id' => $availableStock->id,
                 'start_date' => $startDate->toDateString(),
                 'end_date' => $endDate->toDateString(),
                 'duration_days' => $durationDays,
@@ -70,9 +77,8 @@ class BookingController extends Controller
                 'terms_ip_address' => $request->ip(),
             ]);
 
-            // 🔒 Lock motor
-            $motorcycle->update([
-                'status' => Motorcycle::STATUS_UNAVAILABLE
+            $availableStock->update([
+                'status' => MotorcycleStock::STATUS_BOOKED,
             ]);
 
             $booking->recordStatusHistory(
@@ -122,10 +128,13 @@ class BookingController extends Controller
                 'cancelled_at' => now(),
             ]);
 
-            // 🔓 Balikin motor jadi available
-            $booking->motorcycle->update([
-                'status' => Motorcycle::STATUS_AVAILABLE
-            ]);
+            if ($booking->motorcycleStock) {
+
+                $booking->motorcycleStock->update([
+                    'status' => MotorcycleStock::STATUS_AVAILABLE,
+                ]);
+
+            }
 
             $booking->recordStatusHistory(
                 $oldStatus,
@@ -140,12 +149,17 @@ class BookingController extends Controller
         });
     }
 
-    private function hasOverlappingBooking(Motorcycle $motorcycle, Carbon $startDate, Carbon $endDate): bool
-    {
-        return Booking::where('motorcycle_id', $motorcycle->id)
+    private function hasOverlappingBooking(
+        MotorcycleStock $stock,
+        Carbon $startDate,
+        Carbon $endDate
+    ): bool {
+
+        return Booking::where('motorcycle_stock_id', $stock->id)
             ->whereIn('status', Booking::blockingStatuses())
             ->whereDate('start_date', '<=', $endDate->toDateString())
             ->whereDate('end_date', '>=', $startDate->toDateString())
             ->exists();
+
     }
 }

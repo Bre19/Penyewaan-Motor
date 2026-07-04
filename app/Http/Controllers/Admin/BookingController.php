@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\RentalChecklist;
+use App\Models\MotorcycleStock;
 use App\Models\RentalSafetyScore;
 use App\Models\Motorcycle;
 use Illuminate\Http\Request;
@@ -155,12 +156,16 @@ class BookingController extends Controller
                 'rejection_reason' => $validated['rejection_reason'],
             ]);
 
-            // Unlock motor
             $booking->motorcycle->update([
                 'status' => Motorcycle::STATUS_AVAILABLE
             ]);
 
             $booking->recordStatusHistory($oldStatus, Booking::STATUS_REJECTED, $request->user()->id, $validated['rejection_reason']);
+            if ($booking->motorcycleStock) {
+                $booking->motorcycleStock->update([
+                    'status' => MotorcycleStock::STATUS_AVAILABLE,
+                ]);
+            }
         });
 
         return redirect()
@@ -266,6 +271,12 @@ class BookingController extends Controller
             $booking->update([
                 'status' => Booking::STATUS_ONGOING,
             ]);
+
+            if ($booking->motorcycleStock) {
+                $booking->motorcycleStock->update([
+                    'status' => MotorcycleStock::STATUS_RENTED,
+                ]);
+            }
 
             $booking->recordStatusHistory($oldStatus, Booking::STATUS_ONGOING, $request->user()->id, 'Checklist serah-terima selesai dan motor mulai disewa.');
         });
@@ -373,7 +384,6 @@ class BookingController extends Controller
                     'additional_charge_confirmed_at' => null,
                 ]);
 
-                // 🔓 Unlock motor setelah selesai
                 $booking->motorcycle->update([
                     'status' => Motorcycle::STATUS_AVAILABLE
                 ]);
