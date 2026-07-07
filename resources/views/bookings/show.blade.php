@@ -65,10 +65,27 @@
                     <div>
                         <span class="badge-orange">Unit Sewa</span>
                         <h2 class="mt-4 text-3xl font-black text-bali-navy">
-                            {{ $booking->motorcycle->brand }} {{ $booking->motorcycle->model }}
+                            {{ $booking->rentedMotorcycle()->brand }}
+                            {{ $booking->rentedMotorcycle()->model }}
                         </h2>
+
                         <p class="mt-2 font-semibold text-bali-muted">
-                            {{ $booking->motorcycle->type ?? '-' }} • {{ $booking->motorcycle->year ?? '-' }}
+                        @if($booking->motorcycleStock?->image)
+
+                        <div class="mt-6">
+
+                            <img
+                                src="{{ asset('storage/'.$booking->motorcycleStock->image) }}"
+                                class="h-60 w-full rounded-3xl border border-bali-line object-cover"
+                                alt="Unit Motor"
+                            >
+
+                        </div>
+
+                        @endif
+                            {{ $booking->rentedMotorcycle()->type ?? '-' }}
+                            •
+                            {{ $booking->rentedMotorcycle()->year ?? '-' }}
                         </p>
                     </div>
 
@@ -78,6 +95,25 @@
                 </div>
 
                 <div class="mt-8 grid gap-4 md:grid-cols-2">
+                    <div class="rounded-2xl border border-bali-line p-5">
+                        <span class="block text-sm text-bali-muted">
+                            Unit Motor
+                        </span>
+
+                        <strong class="mt-1 block text-bali-navy">
+                            {{ $booking->motorcycleStock?->stock_code ?? '-' }}
+                        </strong>
+                    </div>
+
+                    <div class="rounded-2xl border border-bali-line p-5">
+                        <span class="block text-sm text-bali-muted">
+                            Plat Nomor
+                        </span>
+
+                        <strong class="mt-1 block text-bali-navy">
+                            {{ $booking->motorcycleStock?->plate_number ?? '-' }}
+                        </strong>
+                    </div>
                     <div class="rounded-2xl border border-bali-line p-5">
                         <span class="block text-sm text-bali-muted">Tanggal Mulai</span>
                         <strong class="mt-1 block text-bali-navy">{{ $booking->start_date->translatedFormat('d F Y') }}</strong>
@@ -96,6 +132,16 @@
                     <div class="rounded-2xl border border-bali-line p-5">
                         <span class="block text-sm text-bali-muted">Lokasi Pengantaran</span>
                         <strong class="mt-1 block text-bali-navy">{{ $booking->delivery_location }}</strong>
+                    </div>
+
+                    <div class="rounded-2xl border border-bali-line p-5">
+                        <span class="block text-sm text-bali-muted">
+                            Status Unit
+                        </span>
+
+                        <strong class="mt-1 block text-bali-navy">
+                            {{ $booking->motorcycleStock?->statusLabel() ?? '-' }}
+                        </strong>
                     </div>
                 </div>
 

@@ -12,7 +12,7 @@
                 type="text"
                 name="search"
                 value="{{ request('search') }}"
-                placeholder="Kode booking, nama penyewa, email, motor, atau plat"
+                placeholder="Kode booking, nama penyewa, email, jenis motor, kode unit, atau plat nomor"
                 class="h-13 w-full rounded-2xl border border-bali-line px-4 text-sm outline-none transition focus:border-bali-teal focus:ring-2 focus:ring-bali-teal/20"
             >
         </div>
@@ -79,10 +79,49 @@
                         </td>
 
                         <td class="px-6 py-5">
-                            <strong class="text-bali-navy">
-                                {{ $booking->motorcycle->brand }} {{ $booking->motorcycle->model }}
-                            </strong>
-                            <span class="mt-1 block text-xs text-bali-muted">{{ $booking->motorcycle->plate_number }}</span>
+
+                            @php
+                                $unit = $booking->rentedMotorcycle();
+                            @endphp
+
+                            @if($unit)
+
+                                <strong class="text-bali-navy">
+                                    {{ $unit->brand }} {{ $unit->model }}
+                                </strong>
+
+                            @else
+
+                                <strong class="text-red-600">
+                                    Unit tidak ditemukan
+                                </strong>
+
+                            @endif
+
+                            @if($booking->motorcycleStock)
+
+                                <div class="mt-3 space-y-1">
+
+                                    <div class="text-xs text-slate-500">
+                                        Unit
+                                    </div>
+
+                                    <div class="font-semibold text-bali-ink">
+                                        {{ $booking->motorcycleStock->stock_code }}
+                                    </div>
+
+                                    <div class="text-xs text-slate-500">
+                                        Plat
+                                    </div>
+
+                                    <div class="font-semibold text-bali-ink">
+                                        {{ $booking->motorcycleStock->plate_number }}
+                                    </div>
+
+                                </div>
+
+                            @endif
+
                         </td>
 
                         <td class="px-6 py-5 text-bali-muted">
@@ -98,7 +137,39 @@
                         </td>
 
                         <td class="px-6 py-5">
-                            <span class="rounded-full bg-slate-100 px-4 py-2 text-xs font-black text-bali-navy">
+                            @php
+
+                            $statusClass = match($booking->status){
+
+                                \App\Models\Booking::STATUS_PENDING_APPROVAL
+                                    => 'bg-yellow-100 text-yellow-700',
+
+                                \App\Models\Booking::STATUS_WAITING_PAYMENT,
+                                \App\Models\Booking::STATUS_WAITING_PAYMENT_VERIFICATION
+                                    => 'bg-orange-100 text-orange-700',
+
+                                \App\Models\Booking::STATUS_PAYMENT_CONFIRMED,
+                                \App\Models\Booking::STATUS_READY_TO_DELIVER
+                                    => 'bg-blue-100 text-blue-700',
+
+                                \App\Models\Booking::STATUS_ONGOING
+                                    => 'bg-emerald-100 text-emerald-700',
+
+                                \App\Models\Booking::STATUS_COMPLETED
+                                    => 'bg-teal-100 text-teal-700',
+
+                                \App\Models\Booking::STATUS_CANCELLED,
+                                \App\Models\Booking::STATUS_REJECTED
+                                    => 'bg-red-100 text-red-700',
+
+                                default
+                                    => 'bg-slate-100 text-slate-700',
+
+                            };
+
+                            @endphp
+
+                            <span class="rounded-full px-4 py-2 text-xs font-black {{ $statusClass }}">
                                 {{ $booking->statusLabel() }}
                             </span>
                         </td>

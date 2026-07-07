@@ -7,6 +7,10 @@
 @section('page-title', 'Detail Booking')
 
 @section('content')
+@php
+    $unit = $booking->rentedMotorcycle();
+    $stock = $booking->motorcycleStock;
+@endphp
 @if (session('success'))
     <div class="mb-8 rounded-2xl border border-teal-200 bg-teal-50 p-5 text-sm font-semibold text-bali-teal-dark">{{ session('success') }}</div>
 @endif
@@ -20,10 +24,108 @@
             <div class="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                 <div>
                     <span class="text-sm font-black uppercase tracking-wide text-bali-teal">{{ $booking->booking_code }}</span>
-                    <h2 class="mt-2 text-3xl font-black text-bali-navy">{{ $booking->motorcycle->brand }} {{ $booking->motorcycle->model }}</h2>
-                    <p class="mt-2 text-bali-muted">{{ $booking->motorcycle->type ?? '-' }} • {{ $booking->motorcycle->year ?? '-' }} • {{ $booking->motorcycle->plate_number }}</p>
+                    <h2 class="mt-2 text-3xl font-black text-bali-navy">
+
+                        {{ $unit?->brand ?? '-' }}
+                        {{ $unit?->model ?? '' }}
+
+                    </h2>
+
+                    <p class="mt-2 text-bali-muted">
+
+                        {{ $unit?->type ?? '-' }}
+
+                        •
+
+                        {{ $unit?->year ?? '-' }}
+
+                    </p>
+
+                    @if($stock)
+                    @if($stock?->image)
+
+                    <div class="mt-8">
+
+                        <span class="block text-sm font-black text-bali-navy">
+
+                            Foto Unit Motor
+
+                        </span>
+
+                        <img
+                            src="{{ asset('storage/'.$stock->image) }}"
+                            class="mt-4 h-64 rounded-2xl border object-cover"
+                        >
+
+                    </div>
+
+                    @endif
+
+                    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+
+                        <div class="rounded-xl bg-slate-100 p-4">
+
+                            <div class="text-xs font-bold uppercase text-slate-500">
+                                Kode Unit
+                            </div>
+
+                            <div class="mt-1 font-black text-bali-ink">
+                                {{ $stock->stock_code }}
+                            </div>
+
+                        </div>
+
+                        <div class="rounded-xl bg-slate-100 p-4">
+
+                            <div class="text-xs font-bold uppercase text-slate-500">
+                                Plat Nomor
+                            </div>
+
+                            <div class="mt-1 font-black text-bali-ink">
+                                {{ $stock->plate_number }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    @endif
                 </div>
-                <span class="w-fit rounded-full bg-slate-100 px-5 py-3 text-xs font-black text-bali-navy">{{ $booking->statusLabel() }}</span>
+                @php
+
+                $statusClass = match($booking->status){
+
+                    Booking::STATUS_PENDING_APPROVAL
+                        => 'bg-yellow-100 text-yellow-700',
+
+                    Booking::STATUS_WAITING_PAYMENT,
+                    Booking::STATUS_WAITING_PAYMENT_VERIFICATION
+                        => 'bg-orange-100 text-orange-700',
+
+                    Booking::STATUS_PAYMENT_CONFIRMED,
+                    Booking::STATUS_READY_TO_DELIVER
+                        => 'bg-blue-100 text-blue-700',
+
+                    Booking::STATUS_ONGOING
+                        => 'bg-emerald-100 text-emerald-700',
+
+                    Booking::STATUS_COMPLETED
+                        => 'bg-teal-100 text-teal-700',
+
+                    Booking::STATUS_CANCELLED,
+                    Booking::STATUS_REJECTED
+                        => 'bg-red-100 text-red-700',
+
+                    default
+                        => 'bg-slate-100 text-slate-700',
+
+                };
+
+                @endphp
+
+                <span class="w-fit rounded-full px-5 py-3 text-xs font-black {{ $statusClass }}">
+                    {{ $booking->statusLabel() }}
+                </span>
             </div>
 
             <div class="mt-8 grid gap-4 md:grid-cols-2">
@@ -33,6 +135,41 @@
                 <div class="rounded-2xl border border-bali-line p-5"><span class="block text-sm text-bali-muted">Tanggal Selesai</span><strong class="mt-1 block text-bali-navy">{{ $booking->end_date->translatedFormat('d F Y') }}</strong></div>
                 <div class="rounded-2xl border border-bali-line p-5"><span class="block text-sm text-bali-muted">Durasi</span><strong class="mt-1 block text-bali-navy">{{ $booking->duration_days }} hari</strong></div>
                 <div class="rounded-2xl border border-bali-line p-5"><span class="block text-sm text-bali-muted">Lokasi Pengantaran</span><strong class="mt-1 block text-bali-navy">{{ $booking->delivery_location }}</strong></div>
+                <div class="rounded-2xl border border-bali-line p-5">
+
+                    <span class="block text-sm text-bali-muted">
+
+                        Status Booking
+
+                    </span>
+
+                    <strong class="mt-1 block text-bali-navy">
+
+                        {{ $booking->statusLabel() }}
+
+                    </strong>
+
+                </div>
+
+                @if($stock)
+
+                <div class="rounded-2xl border border-bali-line p-5">
+
+                    <span class="block text-sm text-bali-muted">
+
+                        Status Unit
+
+                    </span>
+
+                    <strong class="mt-1 block text-bali-navy">
+
+                        {{ $stock->statusLabel() }}
+
+                    </strong>
+
+                </div>
+
+                @endif
             </div>
 
             <div class="mt-8 rounded-[1.5rem] bg-slate-100 p-6">

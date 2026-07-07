@@ -14,6 +14,9 @@
             default => 'bg-slate-100 text-slate-700 border-slate-200',
         }
         : 'bg-slate-100 text-slate-700 border-slate-200';
+
+    $activeUnit = $activeBooking?->rentedMotorcycle();
+    $activeStock = $activeBooking?->motorcycleStock;
 @endphp
 
 <section class="relative overflow-hidden bg-bali-navy py-20 text-white">
@@ -41,8 +44,47 @@
 
                 @if ($activeBooking)
                     <div class="mt-8 rounded-[1.8rem] border border-bali-line bg-white p-6">
-                        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"><div><span class="text-sm font-black uppercase tracking-wide text-bali-teal">{{ $activeBooking->booking_code }}</span><h3 class="mt-2 text-3xl font-black text-bali-navy">{{ $activeBooking->motorcycle->brand }} {{ $activeBooking->motorcycle->model }}</h3><p class="mt-2 font-semibold text-bali-muted">{{ $activeBooking->start_date->translatedFormat('d F Y') }} - {{ $activeBooking->end_date->translatedFormat('d F Y') }}</p></div><span class="w-fit rounded-full border px-4 py-2 text-xs font-black {{ $activeBadgeClass }}">{{ $activeBooking->statusLabel() }}</span></div>
-                        <div class="mt-6 grid gap-4 md:grid-cols-3"><div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Durasi</span><strong class="mt-1 block text-bali-navy">{{ $activeBooking->duration_days }} hari</strong></div><div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Total</span><strong class="mt-1 block text-bali-navy">Rp{{ number_format($activeBooking->total_price, 0, ',', '.') }}</strong></div><div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Pembayaran</span><strong class="mt-1 block text-bali-navy">{{ $activeBooking->latestPayment?->statusLabel() ?? 'Belum Ada' }}</strong></div></div>
+                        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                            <div>
+                                <span class="text-sm font-black uppercase tracking-wide text-bali-teal">{{ $activeBooking->booking_code }}</span>
+                                <h3 class="mt-2 text-3xl font-black text-bali-navy">{{ $activeUnit?->brand }} {{ $activeUnit?->model }}</h3>
+                                <p class="mt-2 font-semibold text-bali-muted">{{ $activeBooking->start_date->translatedFormat('d F Y') }} - {{ $activeBooking->end_date->translatedFormat('d F Y') }}</p>
+
+                                @if($activeStock)
+                                <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-xl bg-slate-100 p-4">
+                                        <div class="text-xs font-bold uppercase text-slate-500">Kode Unit</div>
+                                        <div class="mt-1 font-black text-bali-ink">{{ $activeStock->stock_code }}</div>
+                                    </div>
+                                    <div class="rounded-xl bg-slate-100 p-4">
+                                        <div class="text-xs font-bold uppercase text-slate-500">Plat Nomor</div>
+                                        <div class="mt-1 font-black text-bali-ink">{{ $activeStock->plate_number }}</div>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            <span class="w-fit rounded-full border px-4 py-2 text-xs font-black {{ $activeBadgeClass }}">{{ $activeBooking->statusLabel() }}</span>
+                        </div>
+
+                        @if($activeStock?->image)
+                        <div class="mt-6">
+                            <img
+                                src="{{ asset('storage/'.$activeStock->image) }}"
+                                class="h-64 w-full rounded-3xl border border-bali-line object-cover"
+                                alt="Unit Motor"
+                            >
+                        </div>
+                        @endif
+
+                        <div class="mt-6 grid gap-4 md:grid-cols-4">
+                            <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Durasi</span><strong class="mt-1 block text-bali-navy">{{ $activeBooking->duration_days }} hari</strong></div>
+                            <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Total</span><strong class="mt-1 block text-bali-navy">Rp{{ number_format($activeBooking->total_price, 0, ',', '.') }}</strong></div>
+                            @if($activeStock)
+                            <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Status Unit</span><strong class="mt-1 block text-bali-navy">{{ $activeStock->statusLabel() }}</strong></div>
+                            @endif
+                            <div class="rounded-2xl bg-slate-100 p-4"><span class="block text-sm text-bali-muted">Pembayaran</span><strong class="mt-1 block text-bali-navy">{{ $activeBooking->latestPayment?->statusLabel() ?? 'Belum Ada' }}</strong></div>
+                        </div>
+
                         <div class="mt-6 flex flex-wrap gap-3"><a href="{{ route('bookings.show', $activeBooking) }}" class="btn-dark">Lihat Detail</a>@if ($activeBooking->canUploadPaymentProof())<a href="{{ route('payments.create', $activeBooking) }}" class="btn-primary">Upload Pembayaran</a>@endif</div>
                     </div>
                 @else
@@ -57,7 +99,32 @@
             </aside>
         </div>
 
-        <div class="mt-8 surface-card rounded-[2rem] p-8"><span class="badge-teal">Riwayat</span><h2 class="mt-4 text-3xl font-black text-bali-navy">Riwayat Booking</h2><div class="mt-6 overflow-hidden rounded-[1.5rem] border border-bali-line bg-white">@forelse ($latestBookings as $booking)<div class="flex flex-col gap-4 border-b border-bali-line p-5 last:border-b-0 md:flex-row md:items-center md:justify-between"><div><span class="text-sm font-black uppercase tracking-wide text-bali-teal">{{ $booking->booking_code }}</span><h3 class="mt-1 text-lg font-black text-bali-navy">{{ $booking->motorcycle->brand }} {{ $booking->motorcycle->model }}</h3><p class="mt-1 text-sm font-semibold text-bali-muted">{{ $booking->start_date->translatedFormat('d M Y') }} - {{ $booking->end_date->translatedFormat('d M Y') }}</p></div><div class="flex flex-col gap-3 md:items-end"><strong class="text-bali-navy">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</strong><a href="{{ route('bookings.show', $booking) }}" class="btn-light px-5 py-2.5">Detail</a></div></div>@empty<div class="p-10 text-center text-bali-muted">Belum ada riwayat booking.</div>@endforelse</div></div>
+        <div class="mt-8 surface-card rounded-[2rem] p-8">
+            <span class="badge-teal">Riwayat</span>
+            <h2 class="mt-4 text-3xl font-black text-bali-navy">Riwayat Booking</h2>
+            <div class="mt-6 overflow-hidden rounded-[1.5rem] border border-bali-line bg-white">
+                @forelse ($latestBookings as $booking)
+                <div class="flex flex-col gap-4 border-b border-bali-line p-5 last:border-b-0 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <span class="text-sm font-black uppercase tracking-wide text-bali-teal">{{ $booking->booking_code }}</span>
+                        <h3 class="mt-1 text-lg font-black text-bali-navy">{{ $booking->rentedMotorcycle()?->brand }} {{ $booking->rentedMotorcycle()?->model }}</h3>
+                        @if($booking->motorcycleStock)
+                        <div class="mt-2 text-sm text-bali-muted">
+                            Unit : {{ $booking->motorcycleStock->stock_code }} • {{ $booking->motorcycleStock->plate_number }}
+                        </div>
+                        @endif
+                        <p class="mt-1 text-sm font-semibold text-bali-muted">{{ $booking->start_date->translatedFormat('d M Y') }} - {{ $booking->end_date->translatedFormat('d M Y') }}</p>
+                    </div>
+                    <div class="flex flex-col gap-3 md:items-end">
+                        <strong class="text-bali-navy">Rp{{ number_format($booking->total_price, 0, ',', '.') }}</strong>
+                        <a href="{{ route('bookings.show', $booking) }}" class="btn-light px-5 py-2.5">Detail</a>
+                    </div>
+                </div>
+                @empty
+                <div class="p-10 text-center text-bali-muted">Belum ada riwayat booking.</div>
+                @endforelse
+            </div>
+        </div>
     </div>
 </section>
 @endsection

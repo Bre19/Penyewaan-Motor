@@ -20,7 +20,11 @@ class BookingController extends Controller
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $query = Booking::with(['user', 'motorcycle'])->latest();
+        $query = Booking::with([
+            'user',
+            'motorcycle',
+            'motorcycleStock.motorcycle',
+        ])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $validated['status']);
@@ -40,6 +44,7 @@ class BookingController extends Controller
                     ->orWhereHas('motorcycle', function ($motorcycleQuery) use ($search) {
                         $motorcycleQuery
                             ->where('brand', 'like', "%{$search}%")
+                            ->orwhere('stock_code', 'like', "%{$search}%")
                             ->orWhere('model', 'like', "%{$search}%")
                             ->orWhere('plate_number', 'like', "%{$search}%");
                     });
@@ -59,6 +64,7 @@ class BookingController extends Controller
         $booking->load([
             'user.documents',
             'motorcycle',
+            'motorcycleStock.motorcycle',
             'latestPayment',
             'rentalChecklist',
             'rentalSafetyScore',
@@ -128,6 +134,10 @@ class BookingController extends Controller
             'rejection_reason' => null,
         ]);
 
+        $booking->refresh();
+
+        $booking->syncMotorcycleStock();
+
         $booking->recordStatusHistory($oldStatus, Booking::STATUS_WAITING_PAYMENT, auth()->id(), 'Booking disetujui oleh admin.');
 
         return redirect()
@@ -155,11 +165,9 @@ class BookingController extends Controller
                 'rejection_reason' => $validated['rejection_reason'],
             ]);
 
-            if ($booking->motorcycleStock) {
-                $booking->motorcycleStock->update([
-                    'status' => MotorcycleStock::STATUS_AVAILABLE,
-                ]);
-            }
+            $booking->refresh();
+
+            $booking->syncMotorcycleStock();
 
             $booking->recordStatusHistory(
                 $oldStatus,
@@ -193,6 +201,10 @@ class BookingController extends Controller
             'ready_to_deliver_at' => now(),
             'delivery_preparation_note' => $validated['delivery_preparation_note'] ?? null,
         ]);
+
+        $booking->refresh();
+
+        $booking->syncMotorcycleStock();
 
         $booking->recordStatusHistory(
             $oldStatus,
@@ -273,11 +285,9 @@ class BookingController extends Controller
                 'status' => Booking::STATUS_ONGOING,
             ]);
 
-            if ($booking->motorcycleStock) {
-                $booking->motorcycleStock->update([
-                    'status' => MotorcycleStock::STATUS_RENTED,
-                ]);
-            }
+            $booking->refresh();
+
+            $booking->syncMotorcycleStock();
 
             $booking->recordStatusHistory($oldStatus, Booking::STATUS_ONGOING, $request->user()->id, 'Checklist serah-terima selesai dan motor mulai disewa.');
         });
@@ -361,6 +371,8 @@ class BookingController extends Controller
                 'evaluated_at' => now(),
             ]);
 
+            $booking->refresh();
+
             if ($additionalChargeAmount > 0) {
                 $booking->update([
                     'additional_charge_amount' => $additionalChargeAmount,
@@ -368,6 +380,8 @@ class BookingController extends Controller
                     'additional_charge_status' => Booking::ADDITIONAL_CHARGE_PENDING_PAYMENT,
                     'additional_charge_requested_at' => now(),
                 ]);
+
+                $booking->refresh();
 
                 $booking->recordStatusHistory(
                     $oldStatus,
@@ -385,11 +399,7 @@ class BookingController extends Controller
                     'additional_charge_confirmed_at' => null,
                 ]);
 
-                if ($booking->motorcycleStock) {
-                        $booking->motorcycleStock->update([
-                            'status' => MotorcycleStock::STATUS_AVAILABLE,
-                        ]);
-                    }
+                $booking->syncMotorcycleStock();
 
                     $booking->recordStatusHistory(
                     $oldStatus,
@@ -416,12 +426,4 @@ class BookingController extends Controller
             );
     }
 
-    private function syncMotorcycleStockStatus(Booking $booking): void
-    {
-        if (! $booking->motorcycleStock) {
-            return;
-        }
-
-        $booking->motorcycleStock->syncStatus();
-    }
 }

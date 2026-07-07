@@ -34,8 +34,28 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id',
-        'motorcycle_id',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Primary Relation
+        |--------------------------------------------------------------------------
+        */
+
         'motorcycle_stock_id',
+
+        /*
+        |--------------------------------------------------------------------------
+        | Legacy Compatibility
+        |--------------------------------------------------------------------------
+        |
+        | Masih dipertahankan sementara karena beberapa controller dan view
+        | masih menggunakan motorcycle_id. Field ini akan dihapus setelah
+        | seluruh proses booking menggunakan MotorcycleStock sepenuhnya.
+        |
+        */
+
+        'motorcycle_id',
+
         'booking_code',
         'start_date',
         'end_date',
@@ -245,13 +265,53 @@ class Booking extends Model
             ?? $this->motorcycle;
     }
 
+    public function rentedUnit(): ?MotorcycleStock
+    {
+        return $this->motorcycleStock;
+    }
+
+    public function unitLabel(): string
+    {
+        if (! $this->motorcycleStock) {
+            return '-';
+        }
+
+        return sprintf(
+            '%s (%s)',
+            $this->motorcycleStock->stock_code,
+            $this->motorcycleStock->plate_number
+        );
+    }
+
+    public function isActive(): bool
+    {
+        return in_array(
+            $this->status,
+            self::blockingStatuses(),
+            true
+        );
+    }
+
+    public function isFinished(): bool
+    {
+        return in_array(
+            $this->status,
+            self::finalStatuses(),
+            true
+        );
+    }
+
     public function hasAssignedStock(): bool
     {
-        return $this->motorcycle_stock_id !== null;
+        return $this->motorcycleStock()->exists();
     }
     
     public function syncMotorcycleStock(): void
     {
+        if (! $this->relationLoaded('motorcycleStock')) {
+            $this->load('motorcycleStock');
+        }
+
         if ($this->motorcycleStock) {
             $this->motorcycleStock->syncStatus();
         }
