@@ -101,6 +101,16 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('/payments/{payment}/reject', [AdminPaymentController::class, 'reject'])
             ->name('payments.reject');
+
+        Route::view(
+            '/incident-reports',
+            'admin.incident-reports.index'
+        )->name('incident-reports.index');
+
+        Route::view(
+            '/incident-reports/{id}',
+            'admin.incident-reports.show'
+        )->name('incident-reports.show');
     });
 
 require __DIR__ . '/auth.php';

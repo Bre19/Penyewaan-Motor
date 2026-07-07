@@ -37,6 +37,13 @@
             ],
 
             [
+                'type' => 'link',
+                'label' => 'Pelaporan',
+                'route' => route('admin.incident-reports.index'),
+                'active' => request()->routeIs('admin.incident-reports.*'),
+            ],
+
+            [
                 'type' => 'title',
                 'label' => 'Motor',
             ],
