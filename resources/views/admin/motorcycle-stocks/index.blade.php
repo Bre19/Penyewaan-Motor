@@ -30,7 +30,7 @@
         </h2>
 
         <p class="mt-2 text-bali-muted">
-            Kelola seluruh unit kendaraan beserta status penyewaan dan lokasi GPS dummy.
+            Kelola seluruh unit kendaraan beserta status penyewaan dan lokasi GPS.
         </p>
 
     </div>
@@ -208,7 +208,7 @@ Filter
         <div class="relative">
 
             <img
-                src="{{ asset('images/bali-map.jpg') }}"
+                src="{{ asset('images/bali-map.png') }}"
                 class="w-full h-[640px] object-cover"
             >
 
@@ -400,297 +400,299 @@ Filter
 
     </div>
 
-    {{-- ============================= --}}
-    {{-- UNIT MOTOR --}}
-    {{-- ============================= --}}
+</div>
 
-    <div class="rounded-[2rem] bg-white shadow-xl overflow-hidden">
+{{-- ============================= --}}
+{{-- UNIT MOTOR --}}
+{{-- ============================= --}}
 
-        <div class="flex items-center justify-between px-8 py-6 border-b border-bali-line">
+<div class="rounded-[2rem] bg-white shadow-xl overflow-hidden">
 
-            <div>
+    <div class="flex items-center justify-between px-8 py-6 border-b border-bali-line">
 
-                <h3 class="text-2xl font-black text-bali-navy">
-                    Daftar Unit Motor
-                </h3>
+        <div>
 
-                <p class="mt-2 text-bali-muted">
-                    Kelola seluruh unit kendaraan berdasarkan stok fisik.
-                </p>
+            <h3 class="text-2xl font-black text-bali-navy">
+                Daftar Unit Motor
+            </h3>
 
-            </div>
-
-            <div class="text-sm font-semibold text-bali-muted">
-
-                Total Unit
-
-                <span class="text-bali-navy font-black">
-
-                    {{ $stocks->total() }}
-
-                </span>
-
-            </div>
+            <p class="mt-2 text-bali-muted">
+                Kelola seluruh unit kendaraan berdasarkan stok fisik.
+            </p>
 
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="text-sm font-semibold text-bali-muted">
 
-            <table class="w-full">
+            Total Unit
 
-                <thead class="bg-slate-50">
+            <span class="text-bali-navy font-black">
 
-                <tr class="text-left text-sm font-black text-bali-navy">
+                {{ $stocks->total() }}
 
-                    <th class="px-6 py-5">
-                        Unit
-                    </th>
-
-                    <th class="px-6 py-5">
-                        Motor
-                    </th>
-
-                    <th class="px-6 py-5">
-                        Plat Nomor
-                    </th>
-
-                    <th class="px-6 py-5">
-                        Status
-                    </th>
-
-                    <th class="px-6 py-5">
-                        Catatan
-                    </th>
-
-                    <th class="px-6 py-5 text-right">
-                        Aksi
-                    </th>
-
-                </tr>
-
-                </thead>
-
-                <tbody>
-
-                @forelse($stocks as $stock)
-
-                    @php
-
-                        $statusClass = match($stock->status){
-
-                            'available' =>
-                                'bg-emerald-100 text-emerald-700',
-
-                            'booked' =>
-                                'bg-blue-100 text-blue-700',
-
-                            'rented' =>
-                                'bg-orange-100 text-orange-700',
-
-                            'maintenance' =>
-                                'bg-red-100 text-red-700',
-
-                            default =>
-                                'bg-slate-100 text-slate-700',
-
-                        };
-
-                    @endphp
-
-                    <tr
-                        class="border-t border-bali-line hover:bg-slate-50 transition">
-
-                        {{-- FOTO --}}
-                        <td class="px-6 py-5">
-
-                            <div class="flex items-center gap-4">
-
-                                @if($stock->image)
-
-                                    <img
-                                        src="{{ asset('storage/'.$stock->image) }}"
-                                        class="w-20 h-16 rounded-xl object-cover">
-
-                                @else
-
-                                    <div
-                                        class="w-20 h-16 rounded-xl bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
-
-                                        NO IMAGE
-
-                                    </div>
-
-                                @endif
-
-                                <div>
-
-                                    <div class="font-black">
-
-                                        {{ $stock->stock_code }}
-
-                                    </div>
-
-                                    <div class="text-xs text-slate-500">
-
-                                        Unit #{{ $stock->id }}
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-                        {{-- MOTOR --}}
-                        <td class="px-6 py-5">
-
-                            <div class="font-black">
-
-                                {{ $stock->motorcycle->brand }}
-
-                            </div>
-
-                            <div class="text-sm text-slate-500">
-
-                                {{ $stock->motorcycle->model }}
-
-                            </div>
-
-                        </td>
-
-                        {{-- PLAT --}}
-                        <td class="px-6 py-5">
-
-                            <div class="font-semibold">
-
-                                {{ $stock->plate_number }}
-
-                            </div>
-
-                        </td>
-
-                        {{-- STATUS --}}
-                        <td class="px-6 py-5">
-
-                            <span
-                                class="rounded-full px-4 py-2 text-xs font-bold {{ $statusClass }}">
-
-                                {{ $stock->statusLabel() }}
-
-                            </span>
-
-                        </td>
-
-                        {{-- NOTE --}}
-                        <td class="px-6 py-5">
-
-                            <div class="text-sm text-slate-600">
-
-                                {{ $stock->notes ?: '-' }}
-
-                            </div>
-
-                        </td>
-
-                        {{-- ACTION --}}
-                        <td class="px-6 py-5">
-
-                            <div class="flex justify-end gap-2">
-
-                                <a
-                                    href="{{ route('admin.motorcycle-stocks.edit',$stock) }}"
-                                    class="btn-light">
-
-                                    Edit
-
-                                </a>
-
-                                @if($stock->canBeDeleted())
-
-                                    <form
-                                        method="POST"
-                                        action="{{ route('admin.motorcycle-stocks.destroy',$stock) }}"
-                                        onsubmit="return confirm('Hapus unit motor ini?')">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button
-                                            class="btn-danger">
-
-                                            Hapus
-
-                                        </button>
-
-                                    </form>
-
-                                @else
-
-                                    <button
-                                        disabled
-                                        class="rounded-xl bg-slate-200 px-4 py-2 text-sm font-bold text-slate-500">
-
-                                        Dipakai
-
-                                    </button>
-
-                                @endif
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-                @empty
-
-                    <tr>
-
-                        <td
-                            colspan="6"
-                            class="text-center py-20">
-
-                            <div
-                                class="text-2xl font-black text-bali-navy">
-
-                                Belum ada Unit Motor
-
-                            </div>
-
-                            <div
-                                class="mt-3 text-bali-muted">
-
-                                Tambahkan unit pertama agar dapat mulai disewakan.
-
-                            </div>
-
-                            <a
-                                href="{{ route('admin.motorcycle-stocks.create') }}"
-                                class="btn-primary mt-8 inline-flex">
-
-                                Tambah Unit
-
-                            </a>
-
-                        </td>
-
-                    </tr>
-
-                @endforelse
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div class="border-t border-bali-line p-6">
-
-            {{ $stocks->links() }}
+            </span>
 
         </div>
 
     </div>
 
+    <div class="overflow-x-auto">
+
+        <table class="w-full">
+
+            <thead class="bg-slate-50">
+
+            <tr class="text-left text-sm font-black text-bali-navy">
+
+                <th class="px-6 py-5">
+                    Unit
+                </th>
+
+                <th class="px-6 py-5">
+                    Motor
+                </th>
+
+                <th class="px-6 py-5">
+                    Plat Nomor
+                </th>
+
+                <th class="px-6 py-5">
+                    Status
+                </th>
+
+                <th class="px-6 py-5">
+                    Catatan
+                </th>
+
+                <th class="px-6 py-5 text-right">
+                    Aksi
+                </th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            @forelse($stocks as $stock)
+
+                @php
+
+                    $statusClass = match($stock->status){
+
+                        'available' =>
+                            'bg-emerald-100 text-emerald-700',
+
+                        'booked' =>
+                            'bg-blue-100 text-blue-700',
+
+                        'rented' =>
+                            'bg-orange-100 text-orange-700',
+
+                        'maintenance' =>
+                            'bg-red-100 text-red-700',
+
+                        default =>
+                            'bg-slate-100 text-slate-700',
+
+                    };
+
+                @endphp
+
+                <tr
+                    class="border-t border-bali-line hover:bg-slate-50 transition">
+
+                    {{-- FOTO --}}
+                    <td class="px-6 py-5">
+
+                        <div class="flex items-center gap-4">
+
+                            @if($stock->image)
+
+                                <img
+                                    src="{{ asset('storage/'.$stock->image) }}"
+                                    class="w-20 h-16 rounded-xl object-cover">
+
+                            @else
+
+                                <div
+                                    class="w-20 h-16 rounded-xl bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
+
+                                    NO IMAGE
+
+                                </div>
+
+                            @endif
+
+                            <div>
+
+                                <div class="font-black">
+
+                                    {{ $stock->stock_code }}
+
+                                </div>
+
+                                <div class="text-xs text-slate-500">
+
+                                    Unit #{{ $stock->id }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    {{-- MOTOR --}}
+                    <td class="px-6 py-5">
+
+                        <div class="font-black">
+
+                            {{ $stock->motorcycle->brand }}
+
+                        </div>
+
+                        <div class="text-sm text-slate-500">
+
+                            {{ $stock->motorcycle->model }}
+
+                        </div>
+
+                    </td>
+
+                    {{-- PLAT --}}
+                    <td class="px-6 py-5">
+
+                        <div class="font-semibold">
+
+                            {{ $stock->plate_number }}
+
+                        </div>
+
+                    </td>
+
+                    {{-- STATUS --}}
+                    <td class="px-6 py-5">
+
+                        <span
+                            class="rounded-full px-4 py-2 text-xs font-bold {{ $statusClass }}">
+
+                            {{ $stock->statusLabel() }}
+
+                        </span>
+
+                    </td>
+
+                    {{-- NOTE --}}
+                    <td class="px-6 py-5">
+
+                        <div class="text-sm text-slate-600">
+
+                            {{ $stock->notes ?: '-' }}
+
+                        </div>
+
+                    </td>
+
+                    {{-- ACTION --}}
+                    <td class="px-6 py-5">
+
+                        <div class="flex justify-end gap-2">
+
+                            <a
+                                href="{{ route('admin.motorcycle-stocks.edit',$stock) }}"
+                                class="btn-light">
+
+                                Edit
+
+                            </a>
+
+                            @if($stock->canBeDeleted())
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('admin.motorcycle-stocks.destroy',$stock) }}"
+                                    onsubmit="return confirm('Hapus unit motor ini?')">
+
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        class="btn-danger">
+
+                                        Hapus
+
+                                    </button>
+
+                                </form>
+
+                            @else
+
+                                <button
+                                    disabled
+                                    class="rounded-xl bg-slate-200 px-4 py-2 text-sm font-bold text-slate-500">
+
+                                    Dipakai
+
+                                </button>
+
+                            @endif
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            @empty
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="text-center py-20">
+
+                        <div
+                            class="text-2xl font-black text-bali-navy">
+
+                            Belum ada Unit Motor
+
+                        </div>
+
+                        <div
+                            class="mt-3 text-bali-muted">
+
+                            Tambahkan unit pertama agar dapat mulai disewakan.
+
+                        </div>
+
+                        <a
+                            href="{{ route('admin.motorcycle-stocks.create') }}"
+                            class="btn-primary mt-8 inline-flex">
+
+                            Tambah Unit
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+            @endforelse
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="border-t border-bali-line p-6">
+
+        {{ $stocks->links() }}
+
+    </div>
+
 </div>
+
+@endsection

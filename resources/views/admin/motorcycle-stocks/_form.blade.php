@@ -3,7 +3,7 @@
     $previewId = 'preview-stock-image';
 @endphp
 
-<div class="grid gap-6 md:grid-cols-2">
+<div class="grid gap-6 lg:grid-cols-2">
 
     {{-- MOTOR --}}
     <div>
@@ -11,20 +11,34 @@
             Jenis Motor
         </label>
 
-        <select name="motorcycle_id" class="input-ui" required>
-            <option value="">Pilih Motor</option>
+        <select
+            name="motorcycle_id"
+            class="input-ui"
+            required
+        >
+            <option value="">
+                Pilih Motor
+            </option>
 
             @foreach($motorcycles as $motorcycle)
+
                 <option
                     value="{{ $motorcycle->id }}"
                     @selected(old('motorcycle_id', $stock->motorcycle_id ?? '') == $motorcycle->id)
                 >
                     {{ $motorcycle->brand }}
                     {{ $motorcycle->model }}
-                    (Rp{{ number_format($motorcycle->price_per_day,0,',','.') }}/hari)
+                    •
+                    Rp{{ number_format($motorcycle->price_per_day,0,',','.') }}/hari
                 </option>
+
             @endforeach
+
         </select>
+
+        <p class="mt-2 text-xs text-slate-500">
+            Pilih motor induk yang akan memiliki unit fisik ini.
+        </p>
 
         @error('motorcycle_id')
             <p class="error">{{ $message }}</p>
@@ -33,6 +47,7 @@
 
     {{-- STOCK CODE --}}
     <div>
+
         <label class="label">
             Kode Unit
         </label>
@@ -41,17 +56,24 @@
             type="text"
             name="stock_code"
             value="{{ old('stock_code', $stock->stock_code ?? '') }}"
-            class="input-ui"
+            class="input-ui uppercase"
+            placeholder="Contoh : NMAX-001"
             required
         >
+
+        <p class="mt-2 text-xs text-slate-500">
+            Gunakan kode unik agar unit mudah dikenali.
+        </p>
 
         @error('stock_code')
             <p class="error">{{ $message }}</p>
         @enderror
+
     </div>
 
     {{-- PLATE --}}
     <div>
+
         <label class="label">
             Plat Nomor
         </label>
@@ -60,17 +82,20 @@
             type="text"
             name="plate_number"
             value="{{ old('plate_number', $stock->plate_number ?? '') }}"
-            class="input-ui"
+            class="input-ui uppercase"
+            placeholder="DK 1234 AA"
             required
         >
 
         @error('plate_number')
             <p class="error">{{ $message }}</p>
         @enderror
+
     </div>
 
     {{-- STATUS --}}
     <div>
+
         <label class="label">
             Status Unit
         </label>
@@ -80,6 +105,7 @@
             class="input-ui"
             required
         >
+
             @foreach($statusLabels as $value => $label)
 
                 <option
@@ -90,19 +116,29 @@
                 </option>
 
             @endforeach
+
         </select>
+
+        <p class="mt-2 text-xs text-slate-500">
+            Status awal unit motor.
+        </p>
 
         @error('status')
             <p class="error">{{ $message }}</p>
         @enderror
+
     </div>
 
-    {{-- IMAGE --}}
-    <div class="md:col-span-2">
+</div>
 
-        <label class="label">
-            Foto Unit Motor
-        </label>
+{{-- IMAGE --}}
+<div class="mt-8">
+
+    <label class="label">
+        Foto Unit Motor
+    </label>
+
+    <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6">
 
         <input
             type="file"
@@ -112,23 +148,31 @@
             onchange="previewImage(event)"
         >
 
+        <p class="mt-3 text-xs text-slate-500">
+            Format JPG, PNG, WEBP. Maksimal 4 MB.
+        </p>
+
         @error('image')
             <p class="error">{{ $message }}</p>
         @enderror
 
-        <div class="mt-4">
+        <div class="mt-6">
 
             @if(!empty($stock->image))
+
                 <img
                     id="{{ $previewId }}"
                     src="{{ asset('storage/'.$stock->image) }}"
-                    class="h-32 rounded-xl border object-cover"
+                    class="h-56 rounded-2xl border border-slate-200 bg-white object-cover shadow-sm"
                 >
+
             @else
+
                 <img
                     id="{{ $previewId }}"
-                    class="hidden h-32 rounded-xl border object-cover"
+                    class="hidden h-56 rounded-2xl border border-slate-200 bg-white object-cover shadow-sm"
                 >
+
             @endif
 
         </div>
@@ -138,7 +182,7 @@
 </div>
 
 {{-- NOTES --}}
-<div class="mt-6">
+<div class="mt-8">
 
     <label class="label">
         Catatan
@@ -148,6 +192,7 @@
         name="notes"
         rows="5"
         class="textarea-ui"
+        placeholder="Contoh: Unit baru, kondisi sangat baik, jadwal servis berikutnya, dll."
     >{{ old('notes', $stock->notes ?? '') }}</textarea>
 
     @error('notes')
@@ -157,7 +202,7 @@
 </div>
 
 {{-- ACTION --}}
-<div class="mt-8 flex gap-3 border-t border-bali-line pt-6">
+<div class="mt-8 flex flex-wrap gap-3 border-t border-bali-line pt-6">
 
     <button
         type="submit"
@@ -193,13 +238,34 @@ function previewImage(event)
 {
     const file = event.target.files[0];
 
-    if(!file) return;
+    if (!file) {
+        return;
+    }
 
-    const image = document.getElementById('{{ $previewId }}');
+    const preview = document.getElementById('{{ $previewId }}');
 
-    image.src = URL.createObjectURL(file);
+    preview.src = URL.createObjectURL(file);
 
-    image.classList.remove('hidden');
+    preview.classList.remove('hidden');
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const stockCode = document.querySelector('input[name="stock_code"]');
+    const plate = document.querySelector('input[name="plate_number"]');
+
+    if (stockCode) {
+        stockCode.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        });
+    }
+
+    if (plate) {
+        plate.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+        });
+    }
+
+});
 
 </script>
