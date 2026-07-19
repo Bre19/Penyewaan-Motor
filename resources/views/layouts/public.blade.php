@@ -160,9 +160,9 @@
             <div class="rounded-[1.5rem] border border-bali-line bg-bali-soft p-6">
                 <h4 class="mb-4 font-black text-bali-ink">Kontak</h4>
                 <div class="grid gap-3 text-sm font-semibold text-bali-muted">
-                    <span>WhatsApp: 0812-3456-7890</span>
+                    <span>WhatsApp: +62 819-9777-98440</span>
                     <span>Area layanan: Bali</span>
-                    <span>Email: admin@balimotor.test</span>
+                    <span>Email: rentalnugraha@gmail.com</span>
                 </div>
             </div>
         </div>
